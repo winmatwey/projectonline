@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Конспекты — AeroTaxi School</title>
+  <style>
+    body { font-family: sans-serif; max-width: 800px; margin: 20px auto; }
+    h1 { text-align: center; }
+    .hidden { display: none; }
+    form { margin: 10px 0; padding: 10px; border: 1px solid #ccc; }
+    input, button, textarea { margin: 5px 0; padding: 6px; width: 100%; }
+    .note { border: 1px solid #ddd; margin: 5px 0; padding: 8px; }
+    img { max-width: 200px; margin-top: 5px; display:block; }
+  </style>
+</head>
+<body>
+  <h1>📚 Конспекты</h1>
+
+  <!-- Авторизация -->
+  <div id="auth">
+    <h2>Вход</h2>
+    <form id="loginForm">
+      <input id="email" placeholder="Email" required>
+      <input id="password" type="password" placeholder="Пароль" required>
+      <button>Войти / Зарегистрироваться</button>
+    </form>
+  </div>
+
+  <!-- Основной интерфейс -->
+  <div id="app" class="hidden">
+    <p>Вы вошли как <b id="userEmail"></b> | <a href="#" id="logout">Выйти</a></p>
+
+    <h2>Добавить конспект</h2>
+    <form id="uploadForm">
+      <input id="title" placeholder="Название" required>
+      <textarea id="desc" placeholder="Описание"></textarea>
+      <input id="image" type="file" accept="image/*">
+      <button>Добавить</button>
+    </form>
+
+    <h2>Список конспектов</h2>
+    <div id="notes"></div>
+  </div>
+
+<script>
+const API = "http://localhost:5000"; // поменяйте на адрес сервера
+let current = localStorage.getItem("user");
+
+const authDiv = document.getElementById("auth");
+const appDiv = document.getElementById("app");
+const userEmailSpan = document.getElementById("userEmail");
+const notesDiv = document.getElementById("notes");
+
+async function login(email,pass){
+  // если пользователя нет → регистрация
+  let r = await fetch(API+"/login",{
+    method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({email,password:pass})
+  });
+  if(!r.ok){
+    // пробуем зарегистрировать
+    let reg = await fetch(API+"/register",{
+      method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({email,password:pass})
+    });
+    if(!reg.ok){ alert("Ошибка входа/регистрации"); return; }
+  }
+  current=email;
+  localStorage.setItem("user",email);
+  authDiv.classList.add("hidden");
+  appDiv.classList.remove("hidden");
+  userEmailSpan.textContent=email;
+  loadNotes();
+}
+
+async function loadNotes(){
+  let r = await fetch(API+"/notes");
+  notesDiv.innerHTML="";
+  (await r.json()).forEach(n=>{
+    let d=document.createElement("div");
+    d.className="note";
+    d.innerHTML=`<b>${n.title}</b><br>${n.desc}<br>
+      ${n.image ? `<img src="${n.image}">` : ""}
+      <br><small>${n.user}</small>`;
+    notesDiv.appendChild(d);
+  });
+}
+
+document.getElementById("loginForm").onsubmit=e=>{
+  e.preventDefault();
+  login(email.value,password.value);
+};
+
+document.getElementById("logout").onclick=()=>{
+  localStorage.removeItem("user");
+  location.reload();
+};
+
+document.getElementById("uploadForm").onsubmit=async e=>{
+  e.preventDefault();
+  let fileInput=document.getElementById("image");
+  let imgData="";
+  if(fileInput.files.length>0){
+    let reader=new FileReader();
+    await new Promise(res=>{
+      reader.onload=()=>{ imgData=reader.result; res(); };
+      reader.readAsDataURL(fileInput.files[0]);
+    });
+  }
+  await fetch(API+"/notes",{
+    method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      title:title.value,desc:desc.value,user:current,image:imgData
+    })
+  });
+  loadNotes();
+  e.target.reset();
+};
+
+if(current){
+  authDiv.classList.add("hidden");
+  appDiv.classList.remove("hidden");
+  userEmailSpan.textContent=current;
+  loadNotes();
+}
+</script>
+</body>
+</html>
