@@ -1,0 +1,14 @@
+{
+  "admin": {
+    "password": "$2b$12$6iYpDkH07yJt8MGFPuTVreZ6Rzp9YNTp0sx9uyB1VhYZ7phfwnqwS",
+    "role": "admin"
+  },
+  "ivan": {
+    "password": "$2b$12$8CV2Yg3DQD4ulgjB/RAq5O1cUCjYFZWFaFjTXLlkkm2T3rzfGcvRy",
+    "role": "student"
+  },
+  "masha": {
+    "password": "$2b$12$YJD5Bti49P10fyFu0Hbr0OeAHwk9ifVlnAt7rLbJpF2DgxZWw4d4a",
+    "role": "student"
+  }
+}
