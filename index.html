@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>AeroTaxi Notes</title>
+  <style>
+    body { font-family: sans-serif; background: var(--bg,#fff); color: var(--fg,#000); }
+    .note { border:1px solid #ccc; padding:10px; margin:10px; }
+    #adminPanel { border:2px solid #666; padding:10px; margin:10px; }
+  </style>
+</head>
+<body>
+  <h1>AeroTaxi Notes</h1>
+  <div id="loginBox">
+    <input id="login" placeholder="Login"><br>
+    <input id="password" type="password" placeholder="Password"><br>
+    <button onclick="doLogin()">Войти</button>
+    <div id="loginError" style="color:red"></div>
+  </div>
+
+  <div id="main" style="display:none">
+    <h2>Конспекты</h2>
+    <div id="notes"></div>
+    <h3>Добавить конспект</h3>
+    <input id="noteTitle" placeholder="Заголовок"><br>
+    <textarea id="noteDesc" placeholder="Описание"></textarea><br>
+    <input type="file" id="noteImg"><br>
+    <button onclick="addNote()">Добавить</button>
+    <div id="adminPanel" style="display:none">
+      <h2>Админ-панель</h2>
+      <h3>Пользователи</h3>
+      <div id="users"></div>
+      <input id="newUser" placeholder="Логин">
+      <input id="newPass" placeholder="Пароль">
+      <select id="newRole"><option value="student">student</option><option value="admin">admin</option></select>
+      <button onclick="addUser()">Добавить/Изменить</button>
+      <br><input id="delUser" placeholder="Логин для удаления">
+      <button onclick="delUser()">Удалить</button>
+      <h3>Тема</h3>
+      <select id="themeSel" onchange="changeTheme()"><option value="light">Светлая</option><option value="dark">Тёмная</option></select>
+    </div>
+  </div>
+
+<script>
+let currentUser=null, currentPass=null, currentRole=null;
+
+async function doLogin(){
+  let login=document.getElementById("login").value;
+  let password=document.getElementById("password").value;
+  let r=await fetch("/login",{method:"POST",headers:{'Content-Type':'application/json'},body:JSON.stringify({login,password})});
+  let d=await r.json();
+  if(!d.ok){document.getElementById("loginError").innerText=d.error;return;}
+  currentUser=login; currentPass=password; currentRole=d.role;
+  document.getElementById("loginBox").style.display="none";
+  document.getElementById("main").style.display="block";
+  if(currentRole=="admin") document.getElementById("adminPanel").style.display="block";
+  loadNotes(); if(currentRole=="admin") loadUsers(); if(currentRole=="admin") loadTheme();
+}
+
+async function loadNotes(){
+  let r=await fetch("/notes"); let d=await r.json();
+  let div=document.getElementById("notes"); div.innerHTML="";
+  d.forEach((n,i)=>{
+    let el=document.createElement("div"); el.className="note";
+    el.innerHTML=`<b>${n.title}</b> (${n.user})<br>${n.desc}<br>`;
+    if(n.image) el.innerHTML+=`<img src="${n.image}" width=100><br>`;
+    el.innerHTML+=`<button onclick='downloadNoteFiles(${JSON.stringify(n)})'>Скачать</button>`;
+    if(currentRole=="admin"){
+      el.innerHTML+=` <button onclick='delNote(${i})'>Удалить</button>`;
+    }
+    div.appendChild(el);
+  });
+}
+
+async function addNote(){
+  let title=document.getElementById("noteTitle").value;
+  let desc=document.getElementById("noteDesc").value;
+  let file=document.getElementById("noteImg").files[0];
+  let img="";
+  if(file){img=await toBase64(file);}
+  await fetch("/notes",{method:"POST",headers:{'Content-Type':'application/json'},body:JSON.stringify({title,desc,user:currentUser,image:img})});
+  loadNotes();
+}
+function toBase64(file){return new Promise((res,rej)=>{let r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(file);});}
+
+async function delNote(i){
+  await fetch("/admin/notes/delete",{method:"POST",headers:{'Content-Type':'application/json'},body:JSON.stringify({admin_login:currentUser,admin_password:currentPass,index:i})});
+  loadNotes();
+}
+
+// download each file separately
+async function downloadNoteFiles(note){
+  const text=`Название: ${note.title}\nАвтор: ${note.user}\n\nОписание:\n${note.desc}`;
+  const blob=new Blob([text],{type:'text/plain'});
+  const a1=document.createElement('a');a1.href=URL.createObjectURL(blob);
+  a1.download=(note.title||"note")+".txt";a1.click();
+  URL.revokeObjectURL(a1.href);
+  if(note.image){
+    const parts=note.image.split(",");
+    const meta=parts[0]; const b64=parts[1];
+    const mime=(meta.match(/data:(.*);base64/)||[null,"image/png"])[1];
+    const ext=mime.split("/")[1]||"png";
+    const byteChars=atob(b64);const arr=new Uint8Array(byteChars.length);
+    for(let i=0;i<byteChars.length;i++) arr[i]=byteChars.charCodeAt(i);
+    const blobImg=new Blob([arr],{type:mime});
+    const a2=document.createElement('a');a2.href=URL.createObjectURL(blobImg);
+    a2.download=(note.title||"note")+"."+ext; a2.click();
+    URL.revokeObjectURL(a2.href);
+  }
+}
+
+// Users
+async function loadUsers(){
+  let r=await fetch("/admin/users/list",{method:"POST",headers:{'Content-Type':'application/json'},body:JSON.stringify({admin_login:currentUser,admin_password:currentPass})});
+  let d=await r.json(); let div=document.getElementById("users"); div.innerHTML="";
+  for(let u in d){div.innerHTML+=u+" ("+d[u].role+")<br>";}
+}
+async function addUser(){
+  let login=document.getElementById("newUser").value;
+  let password=document.getElementById("newPass").value;
+  let role=document.getElementById("newRole").value;
+  await fetch("/admin/users/add_or_update",{method:"POST",headers:{'Content-Type':'application/json'},body:JSON.stringify({admin_login:currentUser,admin_password:currentPass,login,password,role})});
+  loadUsers();
+}
+async function delUser(){
+  let login=document.getElementById("delUser").value;
+  await fetch("/admin/users/delete",{method:"POST",headers:{'Content-Type':'application/json'},body:JSON.stringify({admin_login:currentUser,admin_password:currentPass,login})});
+  loadUsers();
+}
+
+// Theme
+async function loadTheme(){
+  let r=await fetch("/admin/settings/theme"); let d=await r.json();
+  document.getElementById("themeSel").value=d.theme; applyTheme(d.theme);
+}
+async function changeTheme(){
+  let theme=document.getElementById("themeSel").value;
+  await fetch("/admin/settings/theme",{method:"POST",headers:{'Content-Type':'application/json'},body:JSON.stringify({admin_login:currentUser,admin_password:currentPass,theme})});
+  applyTheme(theme);
+}
+function applyTheme(t){
+  if(t=="dark"){document.body.style.setProperty("--bg","#222");document.body.style.setProperty("--fg","#eee");}
+  else {document.body.style.setProperty("--bg","#fff");document.body.style.setProperty("--fg","#000");}
+}
+</script>
+</body>
+</html>
