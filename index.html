@@ -58,9 +58,16 @@
     <div id="mainBox" style="display:none">
       <div class="card notes">
         <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
-          <h3>Добавить конспект</h3>
+          <h3>Добавить материал</h3>
           <div><button id="logoutBtn" class="btn ghost">Выйти</button></div>
-        </div>
+      </div>
+        <input id="title" placeholder="Название материала">
+        <textarea id="desc" placeholder="Краткое описание"></textarea>
+        <input id="image" type="file" accept="image/*">
+        <div style="display:flex;gap:8px;margin-top:8px"><button id="addNoteBtn" class="btn">Добавить</button><button id="refreshBtn" class="btn ghost">Обновить список</button></div>
+        <div id="notesList" class="note-grid"></div>
+      </div>
+      </div>
         <input id="title" placeholder="Название конспекта">
         <textarea id="desc" placeholder="Краткое описание"></textarea>
         <input id="image" type="file" accept="image/*">
@@ -68,13 +75,14 @@
         <div id="notesList" class="note-grid"></div>
       </div>
 
+
       <div id="testsPanel" class="card tests" style="margin-top:12px">
         <h3>Тесты</h3>
         <div id="testsList" class="note-grid"></div>
       </div>
 
       <div id="adminPanel" class="card admin" style="display:none">
-        <h3>Админ-панель</h3>
+        <h3>Учительская-панель</h3>
         <div style="display:flex;gap:12px;margin-bottom:8px">
           <input id="u_login" placeholder="Логин">
           <input id="u_pass" placeholder="Пароль (оставьте пустым чтобы не менять)">
