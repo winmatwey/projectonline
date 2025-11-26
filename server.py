@@ -219,7 +219,7 @@ def get_tests_public():
     for t in tests:
         tcopy = {k: v for k, v in t.items() if k != 'questions'}
         # include questions but remove 'correct' keys
-        qs = [30]
+        qs = []
         for q in t.get('questions', []):
             qcopy = {'q': q.get('q'), 'choices': q.get('choices')}
             qs.append(qcopy)
