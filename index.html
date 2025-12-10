@@ -259,29 +259,31 @@ async function loadTests(){
 }
 
 function startTest(test){
-  // simple prompt-based test flow
   const answers = [];
   for(let i=0;i<test.questions.length;i++){
-    const q = test.questions[i];
-    // Безопасно обрабатываем q.choices — если не массив, считаем что вариантов нет
-    const choices = Array.isArray(q.choices) ? q.choices : [];
+    const q = test.questions[i] || {};
+    const qtext = (q.q || q.question || q.text || '') + '';
+    // Нормализуем choices в массив строк
+    const rawChoices = Array.isArray(q.choices) ? q.choices : [];
+    const choices = rawChoices.map(c=>{
+      if (c === null || c === undefined) return '';
+      if (typeof c === 'object') {
+        return (c.text || c.label || c.choice || JSON.stringify(c)) + '';
+      }
+      return String(c);
+    }).filter(s => s !== ''); // опционально убираем пустые
     if(choices.length > 0){
-      // Множественный выбор — показываем варианты
-      const promptText = (i+1)+'. '+q.q+'\n'+choices.map((c,idx)=>idx+': '+c).join('\n');
+      const promptText = (i+1)+'. '+qtext+'\n'+choices.map((c,idx)=>idx+': '+c).join('\n');
       const choice = prompt(promptText);
       if(choice===null){ alert('Тест отменён'); return; }
       const num = parseInt(choice);
       answers.push(isNaN(num)?-1:num);
     } else {
-      // Нет вариантов — обрабатываем как открытый вопрос.
-      // Чтобы не ломать текущую серверную логику (которая ожидает числа),
-      // сохраняем -1. При желании можно расширить сервер/клиент для текстовых ответов.
-      const free = prompt((i+1)+'. '+q.q+'\n(Введите ответ)');
+      const free = prompt((i+1)+'. '+qtext+'\n(Введите ответ)');
       if(free===null){ alert('Тест отменён'); return; }
       answers.push(-1);
     }
   }
-  // submit answers
   (async ()=>{
     const r = await api('/tests/submit', {method:'POST', body: JSON.stringify({test_id: test.id, answers: answers, user: current})});
     const j = await r.json();
