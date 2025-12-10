@@ -205,7 +205,8 @@ def set_theme():
     save_json(SETTINGS_FILE, settings)
     return jsonify({"ok": True})
 
-# --- Testing system endpoints ---
+# --- Testing system endpoints ---#
+
 TESTS_FILE = "tests.json"
 RESULTS_FILE = "results.json"
 
@@ -218,15 +219,30 @@ def get_tests_public():
     safe = []
     for t in tests:
         tcopy = {k: v for k, v in t.items() if k != 'questions'}
-        # include questions but remove 'correct' keys
+        # include questions but normalize fields
         qs = []
         for q in t.get('questions', []):
-            qcopy = {'q': q.get('q'), 'choices': q.get('choices')}
+            # If question entry is not a dict (e.g. a plain string), coerce to a dict-like form
+            if not isinstance(q, dict):
+                qtext = str(q) if q is not None else ''
+                qcopy = {'q': qtext, 'choices': []}
+            else:
+                # prefer common keys for question text, fall back to empty string
+                qtext = q.get('q') or q.get('question') or q.get('text') or ''
+                # ensure choices is a list; if None or missing -> empty list
+                choices_raw = q.get('choices', []) 
+                if choices_raw is None:
+                    choices = []
+                elif isinstance(choices_raw, list):
+                    choices = choices_raw
+                else:
+                    # single value -> wrap in list, otherwise coerce to string item
+                    choices = [choices_raw]
+                qcopy = {'q': qtext, 'choices': choices}
             qs.append(qcopy)
         tcopy['questions'] = qs
         safe.append(tcopy)
     return jsonify(safe)
-
 # Submit test answers: {test_id, answers: [choice_index,...], user}
 @app.post("/tests/submit")
 def submit_test():
