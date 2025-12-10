@@ -219,25 +219,32 @@ def get_tests_public():
     safe = []
     for t in tests:
         tcopy = {k: v for k, v in t.items() if k != 'questions'}
-        # include questions but normalize fields
         qs = []
         for q in t.get('questions', []):
-            # If question entry is not a dict (e.g. a plain string), coerce to a dict-like form
             if not isinstance(q, dict):
                 qtext = str(q) if q is not None else ''
                 qcopy = {'q': qtext, 'choices': []}
             else:
-                # prefer common keys for question text, fall back to empty string
                 qtext = q.get('q') or q.get('question') or q.get('text') or ''
-                # ensure choices is a list; if None or missing -> empty list
                 choices_raw = q.get('choices', []) 
                 if choices_raw is None:
                     choices = []
                 elif isinstance(choices_raw, list):
-                    choices = choices_raw
+                    normalized = []
+                    for c in choices_raw:
+                        if c is None:
+                            continue
+                        if isinstance(c, dict):
+                            normalized.append(str(c.get('text') or c.get('label') or c.get('choice') or json.dumps(c, ensure_ascii=False)))
+                        else:
+                            normalized.append(str(c))
+                    choices = normalized
                 else:
-                    # single value -> wrap in list, otherwise coerce to string item
-                    choices = [choices_raw]
+                    # одиночное значение -> список строк
+                    if isinstance(choices_raw, dict):
+                        choices = [str(choices_raw.get('text') or choices_raw.get('label') or json.dumps(choices_raw, ensure_ascii=False))]
+                    else:
+                        choices = [str(choices_raw)]
                 qcopy = {'q': qtext, 'choices': choices}
             qs.append(qcopy)
         tcopy['questions'] = qs
