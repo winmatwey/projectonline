@@ -268,19 +268,39 @@ function startTest(test){
     const choices = rawChoices.map(c=>{
       if (c === null || c === undefined) return '';
       if (typeof c === 'object') {
-        return (c.text || c.label || c.choice || JSON.stringify(c)) + '';
+        return (c.text || c.label || c.choice || JSON.stringify(c));
       }
       return String(c);
-    }).filter(s => s !== ''); // опционально убираем пустые
+    }).filter(s => s !== '');
     if(choices.length > 0){
       const promptText = (i+1)+'. '+qtext+'\n'+choices.map((c,idx)=>idx+': '+c).join('\n');
       const choice = prompt(promptText);
       if(choice===null){ alert('Тест отменён'); return; }
-      const num = parseInt(choice);
+      const trimmed = choice.trim();
+      let num = parseInt(trimmed);
+      if(isNaN(num)){
+        // Попробуем сопоставить введённый текст с вариантом (регистронезависимо)
+        const lowered = trimmed.toLowerCase();
+        const matchIdx = choices.findIndex(c => (c+'').toLowerCase() === lowered);
+        if(matchIdx !== -1){
+          num = matchIdx;
+        } else {
+          // Попробуем частичное совпадение (contains)
+          const partial = choices.findIndex(c => (c+'').toLowerCase().includes(lowered) || lowered.includes((c+'').toLowerCase()));
+          if(partial !== -1){
+            num = partial;
+          } else {
+            // не удалось распознать — сохраняем -1
+            num = -1;
+          }
+        }
+      }
       answers.push(isNaN(num)?-1:num);
     } else {
+      // Нет вариантов — свободный ввод (сервер сейчас не оценивает текстовые ответы)
       const free = prompt((i+1)+'. '+qtext+'\n(Введите ответ)');
       if(free===null){ alert('Тест отменён'); return; }
+      // можно сохранить текст, но сервер ожидает числа — оставим -1
       answers.push(-1);
     }
   }
