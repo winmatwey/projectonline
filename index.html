@@ -263,10 +263,23 @@ function startTest(test){
   const answers = [];
   for(let i=0;i<test.questions.length;i++){
     const q = test.questions[i];
-    const choice = prompt((i+1)+'. '+q.q+'\n'+q.choices.map((c,idx)=>idx+': '+c).join('\n'));
-    if(choice===null){ alert('Тест отменён'); return; }
-    const num = parseInt(choice);
-    answers.push(isNaN(num)?-1:num);
+    // Безопасно обрабатываем q.choices — если не массив, считаем что вариантов нет
+    const choices = Array.isArray(q.choices) ? q.choices : [];
+    if(choices.length > 0){
+      // Множественный выбор — показываем варианты
+      const promptText = (i+1)+'. '+q.q+'\n'+choices.map((c,idx)=>idx+': '+c).join('\n');
+      const choice = prompt(promptText);
+      if(choice===null){ alert('Тест отменён'); return; }
+      const num = parseInt(choice);
+      answers.push(isNaN(num)?-1:num);
+    } else {
+      // Нет вариантов — обрабатываем как открытый вопрос.
+      // Чтобы не ломать текущую серверную логику (которая ожидает числа),
+      // сохраняем -1. При желании можно расширить сервер/клиент для текстовых ответов.
+      const free = prompt((i+1)+'. '+q.q+'\n(Введите ответ)');
+      if(free===null){ alert('Тест отменён'); return; }
+      answers.push(-1);
+    }
   }
   // submit answers
   (async ()=>{
