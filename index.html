@@ -11,11 +11,17 @@
       --bg-light: #f4f6f9;
       --fg-light: #222;
       --card-light: #fff;
-      --bg-dark: #0f1724;
-      --fg-dark: #e6eef7;
-      --card-dark: #111827;
+      --bg-dark: #1a1f36;
+      --fg-dark: #e8eef7;
+      --card-dark: #252d48;
+      --input-bg-light: #fff;
+      --input-bg-dark: #1a2236;
+      --input-fg-light: #222;
+      --input-fg-dark: #d4dce9;
+      --input-border-light: #d1d5db;
+      --input-border-dark: #3a4556;
       --primary: #0b5ea8;
-      --muted: #6b7280;
+      --muted: #8b92a9;
       --success: #16a34a;
       --danger: #dc2626;
     }
@@ -25,7 +31,7 @@
     h1{margin:0;font-size:20px}
     .card{background:var(--card);padding:16px;border-radius:10px;box-shadow:0 6px 18px rgba(11,94,168,0.06)}
     .login, .notes, .news, .guides, .admin{margin-top:16px}
-    input,textarea,select,button{width:100%;padding:10px;border-radius:8px;border:1px solid #d1d5db;box-sizing:border-box;margin-top:8px;font-size:14px}
+    input,textarea,select,button{width:100%;padding:10px;border-radius:8px;border:1px solid var(--input-border);box-sizing:border-box;margin-top:8px;font-size:14px;background:var(--input-bg);color:var(--input-fg)}
     textarea{min-height:90px;resize:vertical}
     .row{display:flex;gap:12px}
     .col{flex:1}
@@ -154,7 +160,7 @@
   </div>
 
 <script>
-const API = ""; // same host
+const API = "";
 let current="", role="", currentPass="";
 
 function el(id){return document.getElementById(id)}
@@ -174,7 +180,6 @@ async function loginAction(){
   el('userInfo').textContent = current + (role?' ('+role+')':'');
   if(role==='admin') el('adminPanel').style.display='block';
   
-  // Show admin buttons for news and guides
   if(role==='admin') {
     el('newsAdminBtn').style.display='block';
     el('guidesAdminBtn').style.display='block';
@@ -334,11 +339,9 @@ async function addNote(){
 function fileToDataURL(file){ return new Promise(res=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.readAsDataURL(file); }); }
 
 async function downloadNoteFiles(note){
-  // text
   const text = `Название: ${note.title}\nАвтор: ${note.user}\n\nОписание:\n${note.desc}`;
   const blob = new Blob([text], {type: 'text/plain'});
   const a1 = document.createElement('a'); a1.href = URL.createObjectURL(blob); a1.download = (note.title||'note').replace(/\s+/g,'_') + '.txt'; a1.click(); URL.revokeObjectURL(a1.href);
-  // image
   if(note.image){
     const parts = note.image.split(','); const meta = parts[0]; const b64 = parts[1] || '';
     const mime = (meta.match(/data:(.*);base64/) || [null,'image/png'])[1]; const ext = mime.split('/')[1] || 'png';
@@ -388,11 +391,24 @@ async function loadTheme(){
 }
 async function changeTheme(){ const theme = el('themeSel').value; await adminPost('/admin/settings/theme', {theme}); applyTheme(theme); }
 function applyTheme(theme){
-  if(theme==='dark'){ document.documentElement.style.setProperty('--bg', 'var(--bg-dark)'); document.documentElement.style.setProperty('--fg','var(--fg-dark)'); document.documentElement.style.setProperty('--card','var(--card-dark)'); }
-  else { document.documentElement.style.setProperty('--bg', 'var(--bg-light)'); document.documentElement.style.setProperty('--fg','var(--fg-light)'); document.documentElement.style.setProperty('--card','var(--card-light)'); }
+  if(theme==='dark'){ 
+    document.documentElement.style.setProperty('--bg', 'var(--bg-dark)'); 
+    document.documentElement.style.setProperty('--fg','var(--fg-dark)'); 
+    document.documentElement.style.setProperty('--card','var(--card-dark)');
+    document.documentElement.style.setProperty('--input-bg','var(--input-bg-dark)');
+    document.documentElement.style.setProperty('--input-fg','var(--input-fg-dark)');
+    document.documentElement.style.setProperty('--input-border','var(--input-border-dark)');
+  }
+  else { 
+    document.documentElement.style.setProperty('--bg', 'var(--bg-light)'); 
+    document.documentElement.style.setProperty('--fg','var(--fg-light)'); 
+    document.documentElement.style.setProperty('--card','var(--card-light)');
+    document.documentElement.style.setProperty('--input-bg','var(--input-bg-light)');
+    document.documentElement.style.setProperty('--input-fg','var(--input-fg-light)');
+    document.documentElement.style.setProperty('--input-border','var(--input-border-light)');
+  }
 }
 
-// initial apply
 applyTheme('light');
 
 // --- Tests frontend ---
@@ -456,7 +472,6 @@ function startTest(test){
   })();
 }
 
-// Admin test management
 el('saveTestBtn')?.addEventListener('click', async ()=>{
   const title = el('testTitle').value.trim();
   const qsText = el('testQuestions').value.trim();
@@ -481,7 +496,6 @@ el('loadResultsBtn')?.addEventListener('click', async ()=>{
   if(Array.isArray(j)) j.forEach(res=> div.innerHTML += `<div>${res.user} — тест ${res.test_id} ${res.score}/${res.total}</div>`);
 });
 
-// load tests on start
 setTimeout(()=>{ if(document.getElementById('testsList')) loadTests(); }, 600);
 
 // --- end tests frontend ---
