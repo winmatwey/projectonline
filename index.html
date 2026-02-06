@@ -44,7 +44,13 @@
     .btn.danger{background:var(--danger)}
     .small{font-size:12px;color:var(--muted);margin-top:6px}
     footer{margin-top:20px;text-align:center;color:var(--muted);font-size:13px}
-    @media(max-width:720px){ .row{flex-direction:column} .note-grid{grid-template-columns:repeat(1,1fr)} }
+    .form-row{display:flex;gap:12px;margin-top:8px}
+    .form-row > *{flex:1}
+    .assign-section{display:none;margin-top:12px;padding:12px;background:rgba(0,0,0,0.05);border-radius:8px}
+    .radio-group{display:flex;gap:16px;margin-top:8px;align-items:center}
+    .radio-group label{margin:0;display:flex;align-items:center;gap:6px;font-size:14px;cursor:pointer}
+    .radio-group input[type="radio"]{margin:0;width:auto}
+    @media(max-width:720px){ .row{flex-direction:column} .note-grid{grid-template-columns:repeat(1,1fr)} .form-row{flex-direction:column} .form-row > *{flex:1} .radio-group{flex-direction:column;align-items:flex-start} }
   </style>
 </head>
 <body>
@@ -72,6 +78,25 @@
         <input id="title" placeholder="Название материала">
         <textarea id="desc" placeholder="Краткое описание"></textarea>
         <input id="image" type="file" accept="image/*">
+        
+        <!-- Выбор видимости материала -->
+        <div class="assign-section" id="assignSection">
+          <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:8px">📌 Кому назначить материал:</label>
+          <div class="radio-group">
+            <label>
+              <input type="radio" name="visibility" value="all" checked>
+              Всем
+            </label>
+            <label>
+              <input type="radio" name="visibility" value="specific">
+              Конкретному пользователю
+            </label>
+          </div>
+          <select id="assignUser" style="display:none">
+            <option value="">Выберите пользователя</option>
+          </select>
+        </div>
+        
         <div style="display:flex;gap:8px;margin-top:8px"><button id="addNoteBtn" class="btn">Добавить</button><button id="refreshBtn" class="btn ghost">Обновить список</button></div>
         <div id="notesList" class="note-grid"></div>
       </div>
@@ -178,7 +203,11 @@ async function loginAction(){
   current = l; role = d.role; currentPass = p;
   el('loginBox').style.display='none'; el('mainBox').style.display='block';
   el('userInfo').textContent = current + (role?' ('+role+')':'');
-  if(role==='admin') el('adminPanel').style.display='block';
+  if(role==='admin') {
+    el('adminPanel').style.display='block';
+    el('assignSection').style.display='block';
+    loadUsersList();
+  }
   
   if(role==='admin') {
     el('newsAdminBtn').style.display='block';
@@ -189,6 +218,34 @@ async function loginAction(){
   if(role==='admin') loadUsers(); 
   loadTheme();
 }
+
+async function loadUsersList(){
+  const r = await adminPost('/admin/users/list', {}); 
+  const u = await r.json(); 
+  const select = el('assignUser');
+  select.innerHTML = '<option value="">Выберите пользователя</option>';
+  for(const k of Object.keys(u)) {
+    const opt = document.createElement('option');
+    opt.value = k;
+    opt.textContent = k + ' (' + u[k].role + ')';
+    select.appendChild(opt);
+  }
+}
+
+// Обработка выбора видимости материала
+document.addEventListener('change', function(e) {
+  if(e.target.name === 'visibility') {
+    const select = el('assignUser');
+    if(e.target.value === 'specific') {
+      select.style.display = 'block';
+      select.required = true;
+    } else {
+      select.style.display = 'none';
+      select.required = false;
+      select.value = '';
+    }
+  }
+});
 
 el('loginBtn').addEventListener('click', loginAction);
 el('logoutBtn').addEventListener('click', ()=>location.reload());
@@ -306,7 +363,13 @@ async function loadNotes(){
   const list = el('notesList'); list.innerHTML='';
   arr.forEach((n, idx)=>{
     const card = document.createElement('div'); card.className='note-card';
-    card.innerHTML = `<h4>${escapeHtml(n.title)}</h4><p>${escapeHtml(n.desc)}</p><div class="small">Автор: ${escapeHtml(n.user)}</div>`;
+    let assignedText = '';
+    if(n.assignedTo) {
+      assignedText = `<div class="small" style="color:var(--primary);margin-top:4px">📌 Только для: ${escapeHtml(n.assignedTo)}</div>`;
+    } else {
+      assignedText = `<div class="small" style="color:var(--success);margin-top:4px">🌍 Для всех</div>`;
+    }
+    card.innerHTML = `<h4>${escapeHtml(n.title)}</h4><p>${escapeHtml(n.desc)}</p><div class="small">Автор: ${escapeHtml(n.user)}</div>${assignedText}`;
     if(n.image){ const img = document.createElement('img'); img.src = n.image; img.style.maxWidth='100%'; img.style.marginTop='8px'; card.appendChild(img); }
     const btnRow = document.createElement('div'); btnRow.style.marginTop='8px';
     const dl = document.createElement('button'); dl.className='btn ghost'; dl.textContent='Скачать'; dl.onclick = ()=>downloadNoteFiles(n);
@@ -331,8 +394,24 @@ async function addNote(){
   const t = el('title').value.trim(), d = el('desc').value.trim();
   const f = el('image').files[0]; let img='';
   if(f) img = await fileToDataURL(f);
-  await api('/notes',{method:'POST', body: JSON.stringify({title:t,desc:d,user:current,image:img})});
+  
+  // Получить выбранный вариант видимости
+  const visibility = document.querySelector('input[name="visibility"]:checked').value;
+  let assignedTo = '';
+  
+  if(visibility === 'specific') {
+    assignedTo = el('assignUser').value;
+    if(!assignedTo) {
+      alert('Выберите пользователя');
+      return;
+    }
+  }
+  
+  await api('/notes',{method:'POST', body: JSON.stringify({title:t,desc:d,user:current,image:img,assignedTo:assignedTo})});
   el('title').value=''; el('desc').value=''; el('image').value='';
+  document.querySelector('input[name="visibility"][value="all"]').checked = true;
+  el('assignUser').style.display = 'none';
+  el('assignUser').value = '';
   loadNotes();
 }
 
@@ -364,12 +443,12 @@ async function saveUser(){
   const login = el('u_login').value.trim(), pass = el('u_pass').value, roleSel = el('u_role').value;
   if(!login){ alert('Введите логин'); return; }
   const payload = {login: login, role: roleSel}; if(pass) payload.password = pass;
-  const r = await adminPost('/admin/users/add_or_update', payload); const j = await r.json(); if(!r.ok) alert(j.error || 'Ошибка'); else { loadUsers(); el('u_login').value=''; el('u_pass').value=''; }
+  const r = await adminPost('/admin/users/add_or_update', payload); const j = await r.json(); if(!r.ok) alert(j.error || 'Ошибка'); else { loadUsers(); loadUsersList(); el('u_login').value=''; el('u_pass').value=''; }
 }
 
 async function delUser(){
   const login = el('del_login').value.trim(); if(!login) return alert('Введите логин');
-  const r = await adminPost('/admin/users/delete', {login}); const j = await r.json(); if(!r.ok) alert(j.error||'Ошибка'); else { loadUsers(); el('del_login').value=''; }
+  const r = await adminPost('/admin/users/delete', {login}); const j = await r.json(); if(!r.ok) alert(j.error||'Ошибка'); else { loadUsers(); loadUsersList(); el('del_login').value=''; }
 }
 
 async function editNotePrompt(idx,note){
