@@ -1,1 +1,55 @@
-# Constants for file paths\nGUIDES_FILE = 'guides.json'\nNEWS_FILE = 'news.json'\n\n# Function to load guides data from file\ndef load_guides():\n    try:\n        with open(GUIDES_FILE, 'r') as f:\n            return json.load(f)\n    except FileNotFoundError:\n        return []\n\n# Function to save guides data to file\ndef save_guides(guides):\n    with open(GUIDES_FILE, 'w') as f:\n        json.dump(guides, f)\n\n# Function to load news data from file\ndef load_news():\n    try:\n        with open(NEWS_FILE, 'r') as f:\n            return json.load(f)\n    except FileNotFoundError:\n        return []\n\n# Function to save news data to file\ndef save_news(news):\n    with open(NEWS_FILE, 'w') as f:\n        json.dump(news, f)\n\n# API endpoints\n@app.route('/news', methods=['GET'])\ndef get_news():\n    return jsonify(load_news())\n\n@app.route('/news', methods=['POST'])\n@admin_required\ndef post_news():\n    content = request.json\n    news = load_news()\n    news.append(content)\n    save_news(news)\n    return jsonify(content), 201\n\n@app.route('/guides', methods=['GET'])\ndef get_guides():\n    return jsonify(load_guides())\n\n@app.route('/guides', methods=['POST'])\n@admin_required\ndef post_guides():\n    content = request.json\n    guides = load_guides()\n    guides.append(content)\n    save_guides(guides)\n    return jsonify(content), 201\n\n@app.route('/admin/news/<int:news_id>', methods=['GET', 'PUT', 'DELETE'])\n@admin_required\ndef admin_news(news_id):\n    # Logic to handle individual news resource based on news_id\n    pass\n\n@app.route('/admin/guides/<int:guides_id>', methods=['GET', 'PUT', 'DELETE'])\n@admin_required\ndef admin_guides(guides_id):\n    # Logic to handle individual guides resource based on guides_id\n    pass\n
+NEWS_FILE = "news.json"
+GUIDES_FILE = "guides.json"
+
+from flask import Flask, jsonify, request
+
+app = Flask(__name__)
+
+# Sample data
+news = []
+guides = []
+
+@app.route('/news', methods=['GET'])
+def get_news():
+    return jsonify(news)
+
+@app.route('/guides', methods=['GET'])
+def get_guides():
+    return jsonify(guides)
+
+@app.route('/admin/news', methods=['POST'])
+def add_news():
+    new_news_item = request.json
+    news.append(new_news_item)
+    return jsonify(new_news_item), 201
+
+@app.route('/admin/news/<int:news_id>', methods=['PUT'])
+def update_news(news_id):
+    updated_news_item = request.json
+    news[news_id] = updated_news_item
+    return jsonify(updated_news_item)
+
+@app.route('/admin/news/<int:news_id>', methods=['DELETE'])
+def delete_news(news_id):
+    deleted_news_item = news.pop(news_id)
+    return jsonify(deleted_news_item)
+
+@app.route('/admin/guides', methods=['POST'])
+def add_guide():
+    new_guide_item = request.json
+    guides.append(new_guide_item)
+    return jsonify(new_guide_item), 201
+
+@app.route('/admin/guides/<int:guide_id>', methods=['PUT'])
+def update_guide(guide_id):
+    updated_guide_item = request.json
+    guides[guide_id] = updated_guide_item
+    return jsonify(updated_guide_item)
+
+@app.route('/admin/guides/<int:guide_id>', methods=['DELETE'])
+def delete_guide(guide_id):
+    deleted_guide_item = guides.pop(guide_id)
+    return jsonify(deleted_guide_item)
+
+if __name__ == '__main__':
+    app.run(debug=True)
