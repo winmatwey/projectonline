@@ -362,6 +362,12 @@ async function loadNotes(){
   const r = await api('/notes'); const arr = await r.json();
   const list = el('notesList'); list.innerHTML='';
   arr.forEach((n, idx)=>{
+    // Проверка видимости материала
+    // Видно если: 1) Для всех (assignedTo пуст), 2) Назначено текущему пользователю, 3) Текущий пользователь - администратор
+    const isVisible = !n.assignedTo || n.assignedTo === current || role === 'admin';
+    
+    if(!isVisible) return; // Пропускаем материал, если он не видимый текущему пользователю
+    
     const card = document.createElement('div'); card.className='note-card';
     let assignedText = '';
     if(n.assignedTo) {
