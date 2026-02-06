@@ -1,4 +1,3 @@
-
 import os
 import json
 import bcrypt
@@ -98,7 +97,7 @@ def login():
         return jsonify({"ok": False, "error":"invalid credentials"}), 401
     return jsonify({"ok": True, "role": u.get("role", "student")})
 
-# NOTES endpoints
+# ===== NOTES (Materials) =====
 @app.get("/notes")
 def list_notes():
     return jsonify(notes)
@@ -110,7 +109,8 @@ def add_note():
         "title": data.get("title", ""),
         "desc": data.get("desc", ""),
         "user": data.get("user", ""),
-        "image": data.get("image", "")
+        "image": data.get("image", ""),
+        "assignedTo": data.get("assignedTo", "")
     }
     notes.append(note)
     save_json(NOTES_FILE, notes)
@@ -151,7 +151,7 @@ def admin_update_note():
     save_json(NOTES_FILE, notes)
     return jsonify({"ok": True})
 
-# NEWS endpoints
+# ===== NEWS =====
 @app.get("/news")
 def list_news():
     return jsonify(news)
@@ -204,7 +204,7 @@ def admin_update_news():
     save_json(NEWS_FILE, news)
     return jsonify({"ok": True})
 
-# GUIDES endpoints
+# ===== GUIDES =====
 @app.get("/guides")
 def list_guides():
     return jsonify(guides)
@@ -257,7 +257,7 @@ def admin_update_guide():
     save_json(GUIDES_FILE, guides)
     return jsonify({"ok": True})
 
-# USER & SETTINGS endpoints
+# ===== USERS =====
 @app.post("/admin/users/list")
 def admin_users_list():
     payload = request.json or {}
@@ -301,6 +301,7 @@ def admin_users_delete():
     save_json(USERS_FILE, users)
     return jsonify({"ok": True})
 
+# ===== SETTINGS =====
 @app.get("/admin/settings/theme")
 def get_theme():
     return jsonify(settings)
@@ -317,9 +318,10 @@ def set_theme():
     save_json(SETTINGS_FILE, settings)
     return jsonify({"ok": True})
 
-# TESTS endpoints
+# ===== TESTS =====
 TESTS_FILE = "tests.json"
 RESULTS_FILE = "results.json"
+
 tests = load_json(TESTS_FILE, [])
 results = load_json(RESULTS_FILE, [])
 
@@ -335,7 +337,7 @@ def get_tests_public():
                 qcopy = {'q': qtext, 'choices': []}
             else:
                 qtext = q.get('q') or q.get('question') or q.get('text') or ''
-                choices_raw = q.get('choices', [])
+                choices_raw = q.get('choices', []) 
                 if choices_raw is None:
                     choices = []
                 elif isinstance(choices_raw, list):
@@ -413,7 +415,9 @@ def admin_tests_delete():
     tid = data.get('id')
     for i,t in enumerate(tests):
         if t.get('id') == tid:
-            tests.pop(i); save_json(TESTS_FILE, tests); return jsonify({'ok':True})
+            tests.pop(i)
+            save_json(TESTS_FILE, tests)
+            return jsonify({'ok':True})
     return jsonify({'error':'not found'}), 404
 
 @app.post("/admin/results")
