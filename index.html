@@ -1,12 +1,11 @@
-<!-- index.html — главный интерфейс проекта -->
-
 <!DOCTYPE html>
 <html lang="ru">
 <head>
   <meta charset="utf-8" />
-  <title>Учитель Онлайн</title>
+  <title>Учитель Онлайн V3.5.0</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <style>
+    * { box-sizing: border-box; }
     :root{
       --bg-light: #f4f6f9;
       --fg-light: #222;
@@ -25,46 +24,94 @@
       --success: #16a34a;
       --danger: #dc2626;
     }
-    html,body{height:100%;margin:0;font-family:Inter,Arial,Helvetica,sans-serif;background:var(--bg);color:var(--fg)}
+    html,body{height:100%;margin:0;font-family:"Segoe UI",Tahoma,Geneva,Verdana,sans-serif;background:var(--bg);color:var(--fg)}
     .container{max-width:1100px;margin:20px auto;padding:16px}
-    header{display:flex;justify-content:space-between;align-items:center;gap:12px}
-    h1{margin:0;font-size:20px}
-    .card{background:var(--card);padding:16px;border-radius:10px;box-shadow:0 6px 18px rgba(11,94,168,0.06)}
-    .login, .notes, .news, .guides, .admin{margin-top:16px}
-    input,textarea,select,button{width:100%;padding:10px;border-radius:8px;border:1px solid var(--input-border);box-sizing:border-box;margin-top:8px;font-size:14px;background:var(--input-bg);color:var(--input-fg)}
+    header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:20px}
+    h1{margin:0;font-size:24px;font-weight:600}
+    .card{background:var(--card);padding:20px;border-radius:12px;box-shadow:0 4px 12px rgba(11,94,168,0.08)}
+    input,textarea,select,button{padding:10px 12px;border-radius:8px;border:1px solid var(--input-border);font-size:14px;background:var(--input-bg);color:var(--input-fg);font-family:inherit}
+    input,textarea,select{width:100%;margin-top:8px}
     textarea{min-height:90px;resize:vertical}
-    .row{display:flex;gap:12px}
-    .col{flex:1}
     .note-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-top:12px}
-    .note-card{background:var(--card);padding:12px;border-radius:10px;box-shadow:0 6px 18px rgba(2,6,23,0.04)}
-    .note-card h4{margin:0 0 6px 0;font-size:16px}
-    .note-card p{margin:0;color:var(--muted);font-size:13px}
-    .btn{background:var(--primary);color:#fff;border:none;padding:8px 12px;border-radius:8px;cursor:pointer}
-    .btn.ghost{background:transparent;color:var(--primary);border:1px solid rgba(11,94,168,0.12)}
-    .btn.danger{background:var(--danger)}
+    .note-card{background:var(--card);padding:16px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.1);transition:transform 0.2s}
+    .note-card:hover{transform:translateY(-4px)}
+    .note-card h4{margin:0 0 8px 0;font-size:16px;font-weight:600}
+    .note-card p{margin:0;color:var(--muted);font-size:13px;line-height:1.5}
+    .btn{background:var(--primary);color:#fff;border:none;padding:10px 16px;border-radius:8px;cursor:pointer;font-weight:500;transition:background 0.2s;display:inline-block}
+    .btn:hover{background:#0a4a8a}
+    .btn.ghost{background:transparent;color:var(--primary);border:1px solid var(--primary)}
+    .btn.ghost:hover{background:rgba(11,94,168,0.1)}
+    .btn.danger{background:var(--danger);color:#fff}
+    .btn.danger:hover{background:#b91c1c}
+    .btn.success{background:var(--success);color:#fff}
+    .btn.success:hover{background:#15803d}
+    .btn.block{display:block;width:100%}
+    .btn.small{padding:6px 12px;font-size:12px}
     .small{font-size:12px;color:var(--muted);margin-top:6px}
-    footer{margin-top:20px;text-align:center;color:var(--muted);font-size:13px}
-    .form-row{display:flex;gap:12px;margin-top:8px}
-    .form-row > *{flex:1}
-    .assign-section{display:none;margin-top:12px;padding:12px;background:rgba(0,0,0,0.05);border-radius:8px}
-    .radio-group{display:flex;gap:16px;margin-top:8px;align-items:center}
+    footer{margin-top:20px;text-align:center;color:var(--muted);font-size:12px}
+    .radio-group{display:flex;gap:16px;margin-top:8px;align-items:center;flex-wrap:wrap}
     .radio-group label{margin:0;display:flex;align-items:center;gap:6px;font-size:14px;cursor:pointer}
-    .radio-group input[type="radio"]{margin:0;width:auto}
-    @media(max-width:720px){ .row{flex-direction:column} .note-grid{grid-template-columns:repeat(1,1fr)} .form-row{flex-direction:column} .form-row > *{flex:1} .radio-group{flex-direction:column;align-items:flex-start} }
+
+    /* Test modal styles */
+    .test-modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center;padding:20px}
+    .test-modal.active{display:flex}
+    .test-container{background:var(--card);border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,0.3);width:100%;max-width:700px;max-height:90vh;display:flex;flex-direction:column;overflow:hidden}
+    .test-header{background:linear-gradient(135deg,var(--primary),#0a4a8a);color:white;padding:24px}
+    .test-title{margin:0;font-size:20px;font-weight:600}
+    .test-progress{margin-top:12px;font-size:13px;opacity:0.9}
+    .progress-bar{width:100%;height:6px;background:rgba(255,255,255,0.2);border-radius:3px;margin-top:8px;overflow:hidden}
+    .progress-fill{height:100%;background:rgba(255,255,255,0.8);border-radius:3px;transition:width 0.3s}
+    .test-content{flex:1;padding:24px;overflow-y:auto}
+    .question-box{margin-bottom:0}
+    .question-number{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;font-weight:600;margin-bottom:8px}
+    .question-text{font-size:16px;font-weight:600;margin:0 0 16px 0;color:var(--fg);word-wrap:break-word;overflow-wrap:break-word}
+    .question-image{max-width:100%;height:auto;border-radius:8px;margin:16px 0;border:1px solid var(--input-border)}
+    .answer-options{display:flex;flex-direction:column;gap:10px;margin-top:16px}
+    .answer-option{display:flex;align-items:flex-start;gap:12px;padding:12px;border:2px solid var(--input-border);border-radius:8px;cursor:pointer;transition:all 0.2s;background:var(--input-bg)}
+    .answer-option:hover{border-color:var(--primary);background:rgba(11,94,168,0.05)}
+    .answer-option input{margin-top:4px;cursor:pointer;flex-shrink:0}
+    .answer-option.selected{border-color:var(--primary);background:rgba(11,94,168,0.1);font-weight:500}
+    .answer-text{flex:1;font-size:14px;word-wrap:break-word;overflow-wrap:break-word}
+    .test-buttons{display:flex;gap:12px;padding:24px;border-top:1px solid var(--input-border);background:var(--card);flex-wrap:wrap}
+    .test-buttons button{flex:1;min-width:100px}
+    .test-result{text-align:center;padding:40px 20px}
+    .result-score{font-size:48px;font-weight:700;color:var(--primary);margin:20px 0}
+
+    /* Wizard modal */
+    .wizard-modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center;padding:20px;overflow-y:auto}
+    .wizard-modal.active{display:flex}
+    .wizard-container{background:var(--card);border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,0.3);width:100%;max-width:600px;padding:32px;margin:20px auto}
+    .wizard-step{display:none}
+    .wizard-step.active{display:block}
+    .wizard-step h2{margin-top:0;color:var(--primary)}
+    .close-wizard{position:absolute;top:16px;right:16px;background:none;border:none;font-size:28px;cursor:pointer;color:var(--muted)}
+
+    /* Material buttons */
+    .btn-group{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+    .btn-group .btn{flex:1;min-width:100px}
+
+    @media(max-width:720px){
+      .note-grid{grid-template-columns:repeat(1,1fr)}
+      .test-container{max-width:100%}
+      .wizard-container{padding:20px}
+      .btn-group{flex-direction:column}
+      .btn-group .btn{width:100%}
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <header>
-      <h1>📚 Учитель Онлайн</h1>
+      <h1>📚 Учитель Онлайн V3.5.0</h1>
       <div id="userInfo" class="small"></div>
     </header>
 
+    <!-- ЛОГИН -->
     <div id="loginBox" class="card login">
-      <h3>Вход</h3>
+      <h3>Вход в систему</h3>
       <input id="login" placeholder="Логин" autocomplete="username">
       <input id="password" type="password" placeholder="Пароль" autocomplete="current-password">
-      <div><button id="loginBtn" class="btn">Войти</button></div>
+      <button id="loginBtn" class="btn block" style="margin-top:12px">Войти</button>
       <div id="loginError" class="small" style="color:var(--danger)"></div>
     </div>
 
@@ -73,221 +120,324 @@
       <div class="card notes">
         <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
           <h3>📄 Материалы</h3>
-          <div><button id="logoutBtn" class="btn ghost">Выйти</button></div>
+          <button id="logoutBtn" class="btn ghost">Выйти</button>
         </div>
         <input id="title" placeholder="Название материала">
         <textarea id="desc" placeholder="Краткое описание"></textarea>
         <input id="image" type="file" accept="image/*">
-        
-        <!-- Выбор видимости материала -->
-        <div class="assign-section" id="assignSection">
-          <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:8px">📌 Кому назначить материал:</label>
-          <div class="radio-group">
-            <label>
-              <input type="radio" name="visibility" value="all" checked>
-              Всем
-            </label>
-            <label>
-              <input type="radio" name="visibility" value="specific">
-              Конкретному пользователю
-            </label>
-          </div>
-          <select id="assignUser" style="display:none">
-            <option value="">Выберите пользователя</option>
-          </select>
+        <div style="display:flex;gap:8px;margin-top:12px">
+          <button id="addNoteBtn" class="btn">Добавить</button>
+          <button id="refreshBtn" class="btn ghost">Обновить</button>
         </div>
-        
-        <div style="display:flex;gap:8px;margin-top:8px"><button id="addNoteBtn" class="btn">Добавить</button><button id="refreshBtn" class="btn ghost">Обновить список</button></div>
         <div id="notesList" class="note-grid"></div>
       </div>
 
       <!-- НОВОСТИ -->
-      <div class="card news" style="margin-top:12px">
+      <div class="card news" style="margin-top:16px">
         <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
           <h3>📰 Новости</h3>
-          <div id="newsAdminBtn" style="display:none"><button id="addNewsBtn" class="btn">+ Добавить новость</button></div>
+          <div id="newsAdminBtn" style="display:none"><button id="addNewsBtn" class="btn">+ Добавить</button></div>
         </div>
-        
         <div id="newsForm" style="display:none;margin-bottom:16px;padding:12px;background:rgba(0,0,0,0.05);border-radius:8px">
-          <input id="newsTitle" placeholder="Заголовок новости">
-          <textarea id="newsDesc" placeholder="Содержание новости"></textarea>
+          <input id="newsTitle" placeholder="Заголовок">
+          <textarea id="newsDesc" placeholder="Содержание"></textarea>
           <input id="newsImage" type="file" accept="image/*">
           <div style="display:flex;gap:8px;margin-top:8px">
             <button id="saveNewsBtn" class="btn">Сохранить</button>
             <button id="cancelNewsBtn" class="btn ghost">Отменить</button>
           </div>
         </div>
-        
         <div id="newsList" class="note-grid"></div>
       </div>
 
       <!-- ПОСОБИЯ -->
-      <div class="card guides" style="margin-top:12px">
+      <div class="card guides" style="margin-top:16px">
         <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
           <h3>📚 Пособия</h3>
-          <div id="guidesAdminBtn" style="display:none"><button id="addGuideBtn" class="btn">+ Добавить пособие</button></div>
+          <div id="guidesAdminBtn" style="display:none"><button id="addGuideBtn" class="btn">+ Добавить</button></div>
         </div>
-        
         <div id="guidesForm" style="display:none;margin-bottom:16px;padding:12px;background:rgba(0,0,0,0.05);border-radius:8px">
-          <input id="guideTitle" placeholder="Название пособия">
-          <textarea id="guideDesc" placeholder="Описание пособия"></textarea>
+          <input id="guideTitle" placeholder="Название">
+          <textarea id="guideDesc" placeholder="Описание"></textarea>
           <input id="guideImage" type="file" accept="image/*">
           <div style="display:flex;gap:8px;margin-top:8px">
             <button id="saveGuideBtn" class="btn">Сохранить</button>
             <button id="cancelGuideBtn" class="btn ghost">Отменить</button>
           </div>
         </div>
-        
         <div id="guidesList" class="note-grid"></div>
       </div>
 
       <!-- ТЕСТЫ -->
-      <div id="testsPanel" class="card tests" style="margin-top:12px">
-        <h3>🧪 Тесты</h3>
+      <div id="testsPanel" class="card tests" style="margin-top:16px">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+          <h3>🧪 Тесты</h3>
+          <div id="testsAdminBtn" style="display:none"><button id="createTestBtn" class="btn">+ Создать тест</button></div>
+        </div>
         <div id="testsList" class="note-grid"></div>
       </div>
 
       <!-- АДМИН ПАНЕЛЬ -->
-      <div id="adminPanel" class="card admin" style="display:none">
+      <div id="adminPanel" class="card admin" style="display:none;margin-top:16px">
         <h3>⚙️ Учительская панель</h3>
-        <div style="display:flex;gap:12px;margin-bottom:8px">
-          <input id="u_login" placeholder="Логин">
-          <input id="u_pass" placeholder="Пароль (оставьте пустым чтобы не менять)">
-          <select id="u_role"><option value="student">Ученик</option><option value="admin">Администратор</option></select>
+
+        <h4>Управление пользователями</h4>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">
+          <input id="u_login" placeholder="Логин" style="flex:1;min-width:120px">
+          <input id="u_pass" placeholder="Пароль" style="flex:1;min-width:120px">
+          <select id="u_role" style="flex:1;min-width:100px"><option value="student">Ученик</option><option value="admin">Админ</option></select>
           <button id="saveUserBtn" class="btn">Сохранить</button>
         </div>
-        <div style="display:flex;gap:12px;margin-bottom:8px">
-          <input id="del_login" placeholder="Логин для удаления">
-          <button id="delUserBtn" class="btn danger">Удалить пользователя</button>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+          <input id="del_login" placeholder="Логин для удаления" style="flex:1;min-width:150px">
+          <button id="delUserBtn" class="btn danger">Удалить</button>
         </div>
-        <div style="display:flex;gap:12px;align-items:center">
+
+        <div style="display:flex;gap:12px;align-items:center;margin-bottom:12px">
           <label>Тема:</label>
           <select id="themeSel"><option value="light">Светлая</option><option value="dark">Тёмная</option></select>
         </div>
-        <h4 style="margin-top:12px">Управление тестами</h4>
-        <div style="margin-bottom:8px">
-          <input id="testTitle" placeholder="Название теста">
-          <textarea id="testQuestions" placeholder='JSON вопросов (пример: [{"q":"Вопрос","choices":["a","b"],"correct":1}])' style="min-height:80px"></textarea>
-          <button id="saveTestBtn" class="btn">Сохранить тест</button>
-          <input id="delTestId" placeholder="ID теста для удаления">
-          <button id="delTestBtn" class="btn danger">Удалить тест</button>
-          <h4 style="margin-top:8px">Результаты</h4>
-          <button id="loadResultsBtn" class="btn ghost">Загрузить результаты</button>
-          <div id="resultsList" class="small" style="margin-top:8px"></div>
-        </div>
 
-        <h4 style="margin-top:12px">Пользователи</h4>
-        <div id="usersList" class="small"></div>
+        <h4 style="margin-top:16px">Пользователи</h4>
+        <div id="usersList" class="small" style="max-height:150px;overflow-y:auto;border:1px solid var(--input-border);padding:8px;border-radius:8px"></div>
+
+        <h4 style="margin-top:16px">Результаты тестов</h4>
+        <button id="loadResultsBtn" class="btn ghost" style="margin-bottom:8px">Загрузить результаты</button>
+        <div id="resultsList" class="small" style="max-height:150px;overflow-y:auto"></div>
       </div>
     </div>
-
-    <footer class="small">Учитель Онлайн версии 3.0.1TEST 
+  </div>
+  <footer class="small">Учитель Онлайн версии 3.5.0TEST
       Для получения полной версии для развертования системы в своих условиях обратаитесь в поддержку сервиса в ТГ: @winmatwey</footer>
+  </div>
+
+  <!-- МОДАЛЬНОЕ ОКНО ПРОХОЖДЕНИЯ ТЕСТА -->
+  <div id="testModal" class="test-modal">
+    <div class="test-container">
+      <div class="test-header">
+        <h2 class="test-title" id="testModalTitle">Тест</h2>
+        <div class="test-progress">Вопрос <span id="currentQuestion">1</span> из <span id="totalQuestions">10</span></div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="progressFill" style="width:0%"></div>
+        </div>
+      </div>
+      <div class="test-content">
+        <div id="testQuestionsContainer"></div>
+        <div id="testResultContainer" style="display:none"></div>
+      </div>
+      <div class="test-buttons">
+        <button id="prevBtn" class="btn ghost">← Назад</button>
+        <button id="nextBtn" class="btn">Далее →</button>
+        <button id="submitBtn" class="btn" style="display:none">✓ Завершить</button>
+        <button id="closeTestBtn" class="btn ghost" style="display:none">Закрыть</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- МОДАЛЬНОЕ ОКНО СОЗДАНИЯ ТЕСТА -->
+  <div id="wizardModal" class="wizard-modal">
+    <div class="wizard-container">
+      <button class="close-wizard" id="closeWizardBtn">✕</button>
+
+      <div class="wizard-step active" id="step1">
+        <h2>Создание теста</h2>
+        <label>Название теста:</label>
+        <input id="wizTestTitle" placeholder="Введите название">
+        <label style="margin-top:12px">Описание (опционально):</label>
+        <textarea id="wizTestDesc" placeholder="Краткое описание"></textarea>
+        <button class="btn" style="width:100%;margin-top:16px" onclick="nextWizardStep()">Далее</button>
+      </div>
+
+      <div class="wizard-step" id="step2">
+        <h2>Добавление вопросов</h2>
+        <div id="questionsListWiz" style="margin-top:12px;max-height:300px;overflow-y:auto"></div>
+        <button class="btn ghost" style="width:100%;margin-top:12px" onclick="addQuestionToWiz()">+ Добавить вопрос</button>
+        <div style="display:flex;gap:8px;margin-top:16px">
+          <button class="btn ghost" style="flex:1" onclick="prevWizardStep()">← Назад</button>
+          <button class="btn" style="flex:1" onclick="finishWizard()">💾 Сохранить</button>
+        </div>
+      </div>
+    </div>
   </div>
 
 <script>
 const API = "";
 let current="", role="", currentPass="";
+let currentTestData = null;
+let currentQuestionIndex = 0;
+let testAnswers = [];
+let wizardQuestions = [];
 
 function el(id){return document.getElementById(id)}
 
-async function api(path, opts){opts = opts || {}; opts.headers = opts.headers || {'Content-Type':'application/json'};
-  try{const r = await fetch(path, opts); return r;}catch(e){throw new Error('Сервер недоступен: убедитесь, что запущен и открыт порт.')}}
+async function api(path, opts){
+  opts = opts || {};
+  opts.headers = opts.headers || {'Content-Type':'application/json'};
+  try { return await fetch(path, opts); }
+  catch(e){ throw new Error('Сервер недоступен'); }
+}
 
 async function loginAction(){
   el('loginError').textContent = '';
   const l = el('login').value.trim(), p = el('password').value;
   if(!l||!p){ el('loginError').textContent='Введите логин и пароль'; return; }
-  const r = await api('/login',{method:'POST', body: JSON.stringify({login:l,password:p})});
-  const d = await r.json();
-  if(!d.ok){ el('loginError').textContent = d.error || 'Ошибка входа'; return; }
-  current = l; role = d.role; currentPass = p;
-  el('loginBox').style.display='none'; el('mainBox').style.display='block';
-  el('userInfo').textContent = current + (role?' ('+role+')':'');
-  if(role==='admin') {
-    el('adminPanel').style.display='block';
-    el('assignSection').style.display='block';
-    loadUsersList();
-  }
-  
-  if(role==='admin') {
-    el('newsAdminBtn').style.display='block';
-    el('guidesAdminBtn').style.display='block';
-  }
-  
-  loadNotes(); loadNews(); loadGuides(); 
-  if(role==='admin') loadUsers(); 
-  loadTheme();
-}
-
-async function loadUsersList(){
-  const r = await adminPost('/admin/users/list', {}); 
-  const u = await r.json(); 
-  const select = el('assignUser');
-  select.innerHTML = '<option value="">Выберите пользователя</option>';
-  for(const k of Object.keys(u)) {
-    const opt = document.createElement('option');
-    opt.value = k;
-    opt.textContent = k + ' (' + u[k].role + ')';
-    select.appendChild(opt);
-  }
-}
-
-// Обработка выбора видимости материала
-document.addEventListener('change', function(e) {
-  if(e.target.name === 'visibility') {
-    const select = el('assignUser');
-    if(e.target.value === 'specific') {
-      select.style.display = 'block';
-      select.required = true;
-    } else {
-      select.style.display = 'none';
-      select.required = false;
-      select.value = '';
+  try {
+    const r = await api('/login',{method:'POST', body: JSON.stringify({login:l,password:p})});
+    const d = await r.json();
+    if(!d.ok){ el('loginError').textContent = d.error || 'Ошибка входа'; return; }
+    current = l; role = d.role; currentPass = p;
+    el('loginBox').style.display='none'; el('mainBox').style.display='block';
+    el('userInfo').textContent = current + (role?' ('+role+')':'');
+    if(role==='admin') {
+      el('adminPanel').style.display='block';
+      el('testsAdminBtn').style.display='block';
+      el('newsAdminBtn').style.display='block';
+      el('guidesAdminBtn').style.display='block';
+      loadUsersList();
+      loadUsers();
     }
-  }
-});
+    loadNotes(); loadNews(); loadGuides(); loadTests();
+    loadTheme();
+  }catch(e){ console.error(e); el('loginError').textContent = 'Ошибка подключения'; }
+}
 
 el('loginBtn').addEventListener('click', loginAction);
+el('password').addEventListener('keypress', (e)=>{ if(e.key==='Enter') loginAction(); });
 el('logoutBtn').addEventListener('click', ()=>location.reload());
+
+function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function fileToDataURL(file){ return new Promise(res=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.readAsDataURL(file); }); }
+
+async function adminPost(path, payload){
+  payload = payload || {};
+  payload.admin_login = current;
+  payload.admin_password = currentPass;
+  return await api(path, {method:'POST', body: JSON.stringify(payload)});
+}
+
+// ===== МАТЕРИАЛЫ =====
+async function loadNotes(){
+  try{
+    const r = await api('/notes');
+    const arr = await r.json();
+    const list = el('notesList');
+    list.innerHTML='';
+    arr.forEach((n, idx)=>{
+      const card = document.createElement('div');
+      card.className='note-card';
+      card.innerHTML = `<h4>${escapeHtml(n.title)}</h4><p>${escapeHtml(n.desc)}</p><div class="small">Автор: ${escapeHtml(n.user)}</div>`;
+      if(n.image){ const img = document.createElement('img'); img.src = n.image; img.style.maxWidth='100%'; img.style.marginTop='8px'; card.appendChild(img); }
+
+      const btnGroup = document.createElement('div');
+      btnGroup.className='btn-group';
+
+      const downloadBtn = document.createElement('button');
+      downloadBtn.className='btn success small';
+      downloadBtn.textContent='📥 Скачать';
+      downloadBtn.onclick = ()=>downloadNoteFiles(n);
+      btnGroup.appendChild(downloadBtn);
+
+      if(role==='admin'){
+        const delBtn = document.createElement('button');
+        delBtn.className='btn danger small';
+        delBtn.textContent='Удалить';
+        delBtn.onclick = async ()=>{ if(!confirm('Удалить?')) return; await adminPost('/admin/notes/delete',{index:idx}); loadNotes(); };
+        btnGroup.appendChild(delBtn);
+      }
+
+      card.appendChild(btnGroup);
+      list.appendChild(card);
+    });
+  }catch(e){ console.error(e); }
+}
+
+async function downloadNoteFiles(note){
+  const text = `Название: ${note.title}\nАвтор: ${note.user}\n\nОписание:\n${note.desc}`;
+  const blob = new Blob([text], {type: 'text/plain'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = (note.title||'material').replace(/\s+/g,'_') + '.txt';
+  a.click();
+  URL.revokeObjectURL(a.href);
+
+  if(note.image){
+    try {
+      const response = await fetch(note.image);
+      const blob = await response.blob();
+      const ext = response.headers.get('content-type').split('/')[1] || 'png';
+      const a2 = document.createElement('a');
+      a2.href = URL.createObjectURL(blob);
+      a2.download = (note.title||'material').replace(/\s+/g,'_') + '.' + ext;
+      a2.click();
+      URL.revokeObjectURL(a2.href);
+    }catch(e){
+      const parts = note.image.split(',');
+      const meta = parts[0];
+      const b64 = parts[1] || '';
+      const mime = (meta.match(/data:(.*);base64/) || [null,'image/png'])[1];
+      const ext = mime.split('/')[1] || 'png';
+      const byteChars = atob(b64);
+      const byteNumbers = new Array(byteChars.length);
+      for(let i=0;i<byteChars.length;i++) byteNumbers[i]=byteChars.charCodeAt(i);
+      const byteArray = new Uint8Array(byteNumbers);
+      const blobImg = new Blob([byteArray], {type: mime});
+      const a2 = document.createElement('a');
+      a2.href = URL.createObjectURL(blobImg);
+      a2.download = (note.title||'material').replace(/\s+/g,'_') + '.' + ext;
+      a2.click();
+      URL.revokeObjectURL(a2.href);
+    }
+  }
+}
+
+async function addNote(){
+  if(!current){ alert('Войдите'); return; }
+  const t = el('title').value.trim(), d = el('desc').value.trim();
+  const f = el('image').files[0];
+  let img='';
+  if(f) img = await fileToDataURL(f);
+  await api('/notes',{method:'POST', body: JSON.stringify({title:t,desc:d,user:current,image:img,assignedTo:''})});
+  el('title').value=''; el('desc').value=''; el('image').value='';
+  loadNotes();
+}
+
 el('addNoteBtn').addEventListener('click', addNote);
 el('refreshBtn').addEventListener('click', loadNotes);
-el('saveUserBtn').addEventListener('click', saveUser);
-el('delUserBtn').addEventListener('click', delUser);
-el('themeSel').addEventListener('change', changeTheme);
 
-// NEWS functions
-el('addNewsBtn')?.addEventListener('click', ()=>el('newsForm').style.display='block');
-el('cancelNewsBtn')?.addEventListener('click', ()=>el('newsForm').style.display='none');
-el('saveNewsBtn')?.addEventListener('click', addNews);
-
+// ===== НОВОСТИ =====
 async function loadNews(){
-  const r = await api('/news'); const arr = await r.json();
-  const list = el('newsList'); list.innerHTML='';
-  arr.forEach((n, idx)=>{
-    const card = document.createElement('div'); card.className='note-card';
-    card.innerHTML = `<h4>${escapeHtml(n.title)}</h4><p>${escapeHtml(n.desc)}</p><div class="small">Автор: ${escapeHtml(n.user)}</div>`;
-    if(n.image){ const img = document.createElement('img'); img.src = n.image; img.style.maxWidth='100%'; img.style.marginTop='8px'; card.appendChild(img); }
-    const btnRow = document.createElement('div'); btnRow.style.marginTop='8px';
-    const dl = document.createElement('button'); dl.className='btn ghost'; dl.textContent='Скачать'; dl.onclick = ()=>downloadNoteFiles(n);
-    btnRow.appendChild(dl);
-    if(role==='admin'){
-      const del = document.createElement('button'); del.className='btn danger'; del.textContent='Удалить'; del.style.marginLeft='8px';
-      del.onclick = async ()=>{ if(!confirm('Удалить новость?')) return; await adminPost('/admin/news/delete',{index:idx}); loadNews(); };
-      btnRow.appendChild(del);
-      const edit = document.createElement('button'); edit.className='btn'; edit.textContent='Редактировать'; edit.style.marginLeft='8px';
-      edit.onclick = ()=>editNewsPrompt(idx,n);
-      btnRow.appendChild(edit);
-    }
-    card.appendChild(btnRow);
-    list.appendChild(card);
-  });
+  try{
+    const r = await api('/news');
+    const arr = await r.json();
+    const list = el('newsList');
+    list.innerHTML='';
+    arr.forEach((n, idx)=>{
+      const card = document.createElement('div');
+      card.className='note-card';
+      card.innerHTML = `<h4>${escapeHtml(n.title)}</h4><p>${escapeHtml(n.desc)}</p>`;
+      if(n.image){ const img = document.createElement('img'); img.src = n.image; img.style.maxWidth='100%'; img.style.marginTop='8px'; card.appendChild(img); }
+
+      if(role==='admin'){
+        const btnGroup = document.createElement('div');
+        btnGroup.className='btn-group';
+        const del = document.createElement('button');
+        del.className='btn danger small';
+        del.textContent='Удалить';
+        del.onclick = async ()=>{ if(!confirm('Удалить?')) return; await adminPost('/admin/news/delete',{index:idx}); loadNews(); };
+        btnGroup.appendChild(del);
+        card.appendChild(btnGroup);
+      }
+
+      list.appendChild(card);
+    });
+  }catch(e){ console.error(e); }
 }
 
 async function addNews(){
   if(!current){ alert('Войдите'); return; }
   const t = el('newsTitle').value.trim(), d = el('newsDesc').value.trim();
-  const f = el('newsImage').files[0]; let img='';
+  const f = el('newsImage').files[0];
+  let img='';
   if(f) img = await fileToDataURL(f);
   await api('/news',{method:'POST', body: JSON.stringify({title:t,desc:d,user:current,image:img})});
   el('newsTitle').value=''; el('newsDesc').value=''; el('newsImage').value='';
@@ -295,50 +445,89 @@ async function addNews(){
   loadNews();
 }
 
-async function editNewsPrompt(idx,news){
-  const newTitle = prompt('Новый заголовок', news.title); if(newTitle===null) return;
-  const newDesc = prompt('Новое содержание', news.desc); if(newDesc===null) return;
-  const changeImg = confirm('Заменить изображение? OK — выбрать, Cancel — оставить прежнее');
-  let newImage = undefined;
-  if(changeImg){
-    const f = await pickFile(); if(f) newImage = await fileToDataURL(f);
-  }
-  const payload = {index: idx, title: newTitle, desc: newDesc}; if(newImage!==undefined) payload.image = newImage;
-  const r = await adminPost('/admin/news/update', payload); const j = await r.json(); if(!r.ok) alert(j.error||'Ошибка'); else loadNews();
+el('addNewsBtn')?.addEventListener('click', ()=>el('newsForm').style.display='block');
+el('cancelNewsBtn')?.addEventListener('click', ()=>el('newsForm').style.display='none');
+el('saveNewsBtn')?.addEventListener('click', addNews);
+
+// ===== ПОСОБИЯ =====
+async function loadGuides(){
+  try{
+    const r = await api('/guides');
+    const arr = await r.json();
+    const list = el('guidesList');
+    list.innerHTML='';
+    arr.forEach((g, idx)=>{
+      const card = document.createElement('div');
+      card.className='note-card';
+      card.innerHTML = `<h4>${escapeHtml(g.title)}</h4><p>${escapeHtml(g.desc)}</p>`;
+      if(g.image){ const img = document.createElement('img'); img.src = g.image; img.style.maxWidth='100%'; img.style.marginTop='8px'; card.appendChild(img); }
+
+      const btnGroup = document.createElement('div');
+      btnGroup.className='btn-group';
+      const download = document.createElement('button');
+      download.className='btn success small';
+      download.textContent='📥 Скачать';
+      download.onclick = ()=>downloadGuideFiles(g);
+      btnGroup.appendChild(download);
+
+      if(role==='admin'){
+        const del = document.createElement('button');
+        del.className='btn danger small';
+        del.textContent='Удалить';
+        del.onclick = async ()=>{ if(!confirm('Удалить?')) return; await adminPost('/admin/guides/delete',{index:idx}); loadGuides(); };
+        btnGroup.appendChild(del);
+      }
+
+      card.appendChild(btnGroup);
+      list.appendChild(card);
+    });
+  }catch(e){ console.error(e); }
 }
 
-// GUIDES functions
-el('addGuideBtn')?.addEventListener('click', ()=>el('guidesForm').style.display='block');
-el('cancelGuideBtn')?.addEventListener('click', ()=>el('guidesForm').style.display='none');
-el('saveGuideBtn')?.addEventListener('click', addGuide);
+async function downloadGuideFiles(guide){
+  const text = `Название: ${guide.title}\nАвтор: ${guide.user}\n\nОписание:\n${guide.desc}`;
+  const blob = new Blob([text], {type: 'text/plain'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = (guide.title||'guide').replace(/\s+/g,'_') + '.txt';
+  a.click();
+  URL.revokeObjectURL(a.href);
 
-async function loadGuides(){
-  const r = await api('/guides'); const arr = await r.json();
-  const list = el('guidesList'); list.innerHTML='';
-  arr.forEach((g, idx)=>{
-    const card = document.createElement('div'); card.className='note-card';
-    card.innerHTML = `<h4>${escapeHtml(g.title)}</h4><p>${escapeHtml(g.desc)}</p><div class="small">Автор: ${escapeHtml(g.user)}</div>`;
-    if(g.image){ const img = document.createElement('img'); img.src = g.image; img.style.maxWidth='100%'; img.style.marginTop='8px'; card.appendChild(img); }
-    const btnRow = document.createElement('div'); btnRow.style.marginTop='8px';
-    const dl = document.createElement('button'); dl.className='btn ghost'; dl.textContent='Скачать'; dl.onclick = ()=>downloadNoteFiles(g);
-    btnRow.appendChild(dl);
-    if(role==='admin'){
-      const del = document.createElement('button'); del.className='btn danger'; del.textContent='Удалить'; del.style.marginLeft='8px';
-      del.onclick = async ()=>{ if(!confirm('Удалить пособие?')) return; await adminPost('/admin/guides/delete',{index:idx}); loadGuides(); };
-      btnRow.appendChild(del);
-      const edit = document.createElement('button'); edit.className='btn'; edit.textContent='Редактировать'; edit.style.marginLeft='8px';
-      edit.onclick = ()=>editGuidePrompt(idx,g);
-      btnRow.appendChild(edit);
+  if(guide.image){
+    try {
+      const response = await fetch(guide.image);
+      const blob = await response.blob();
+      const ext = response.headers.get('content-type').split('/')[1] || 'png';
+      const a2 = document.createElement('a');
+      a2.href = URL.createObjectURL(blob);
+      a2.download = (guide.title||'guide').replace(/\s+/g,'_') + '.' + ext;
+      a2.click();
+      URL.revokeObjectURL(a2.href);
+    }catch(e){
+      const parts = guide.image.split(',');
+      const meta = parts[0];
+      const b64 = parts[1] || '';
+      const mime = (meta.match(/data:(.*);base64/) || [null,'image/png'])[1];
+      const ext = mime.split('/')[1] || 'png';
+      const byteChars = atob(b64);
+      const byteNumbers = new Array(byteChars.length);
+      for(let i=0;i<byteChars.length;i++) byteNumbers[i]=byteChars.charCodeAt(i);
+      const byteArray = new Uint8Array(byteNumbers);
+      const blobImg = new Blob([byteArray], {type: mime});
+      const a2 = document.createElement('a');
+      a2.href = URL.createObjectURL(blobImg);
+      a2.download = (guide.title||'guide').replace(/\s+/g,'_') + '.' + ext;
+      a2.click();
+      URL.revokeObjectURL(a2.href);
     }
-    card.appendChild(btnRow);
-    list.appendChild(card);
-  });
+  }
 }
 
 async function addGuide(){
   if(!current){ alert('Войдите'); return; }
   const t = el('guideTitle').value.trim(), d = el('guideDesc').value.trim();
-  const f = el('guideImage').files[0]; let img='';
+  const f = el('guideImage').files[0];
+  let img='';
   if(f) img = await fileToDataURL(f);
   await api('/guides',{method:'POST', body: JSON.stringify({title:t,desc:d,user:current,image:img})});
   el('guideTitle').value=''; el('guideDesc').value=''; el('guideImage').value='';
@@ -346,148 +535,86 @@ async function addGuide(){
   loadGuides();
 }
 
-async function editGuidePrompt(idx,guide){
-  const newTitle = prompt('Новое название', guide.title); if(newTitle===null) return;
-  const newDesc = prompt('Новое описание', guide.desc); if(newDesc===null) return;
-  const changeImg = confirm('Заменить изображение? OK — выбрать, Cancel — оставить прежнее');
-  let newImage = undefined;
-  if(changeImg){
-    const f = await pickFile(); if(f) newImage = await fileToDataURL(f);
-  }
-  const payload = {index: idx, title: newTitle, desc: newDesc}; if(newImage!==undefined) payload.image = newImage;
-  const r = await adminPost('/admin/guides/update', payload); const j = await r.json(); if(!r.ok) alert(j.error||'Ошибка'); else loadGuides();
-}
+el('addGuideBtn')?.addEventListener('click', ()=>el('guidesForm').style.display='block');
+el('cancelGuideBtn')?.addEventListener('click', ()=>el('guidesForm').style.display='none');
+el('saveGuideBtn')?.addEventListener('click', addGuide);
 
-// MATERIALS functions
-async function loadNotes(){
-  const r = await api('/notes'); const arr = await r.json();
-  const list = el('notesList'); list.innerHTML='';
-  arr.forEach((n, idx)=>{
-    // Проверка видимости материала
-    // Видно если: 1) Для всех (assignedTo пуст), 2) Назначено текущему пользователю, 3) Текущий пользователь - администратор
-    const isVisible = !n.assignedTo || n.assignedTo === current || role === 'admin';
-    
-    if(!isVisible) return; // Пропускаем материал, если он не видимый текущему пользователю
-    
-    const card = document.createElement('div'); card.className='note-card';
-    let assignedText = '';
-    if(n.assignedTo) {
-      assignedText = `<div class="small" style="color:var(--primary);margin-top:4px">📌 Только для: ${escapeHtml(n.assignedTo)}</div>`;
-    } else {
-      assignedText = `<div class="small" style="color:var(--success);margin-top:4px">🌍 Для всех</div>`;
-    }
-    card.innerHTML = `<h4>${escapeHtml(n.title)}</h4><p>${escapeHtml(n.desc)}</p><div class="small">Автор: ${escapeHtml(n.user)}</div>${assignedText}`;
-    if(n.image){ const img = document.createElement('img'); img.src = n.image; img.style.maxWidth='100%'; img.style.marginTop='8px'; card.appendChild(img); }
-    const btnRow = document.createElement('div'); btnRow.style.marginTop='8px';
-    const dl = document.createElement('button'); dl.className='btn ghost'; dl.textContent='Скачать'; dl.onclick = ()=>downloadNoteFiles(n);
-    btnRow.appendChild(dl);
-    if(role==='admin'){
-      const del = document.createElement('button'); del.className='btn danger'; del.textContent='Удалить'; del.style.marginLeft='8px';
-      del.onclick = async ()=>{ if(!confirm('Удалить материал?')) return; await adminPost('/admin/notes/delete',{index:idx}); loadNotes(); };
-      btnRow.appendChild(del);
-      const edit = document.createElement('button'); edit.className='btn'; edit.textContent='Редактировать'; edit.style.marginLeft='8px';
-      edit.onclick = ()=>editNotePrompt(idx,n);
-      btnRow.appendChild(edit);
-    }
-    card.appendChild(btnRow);
-    list.appendChild(card);
-  });
-}
-
-function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-
-async function addNote(){
-  if(!current){ alert('Войдите'); return; }
-  const t = el('title').value.trim(), d = el('desc').value.trim();
-  const f = el('image').files[0]; let img='';
-  if(f) img = await fileToDataURL(f);
-  
-  // Получить выбранный вариант видимости
-  const visibility = document.querySelector('input[name="visibility"]:checked').value;
-  let assignedTo = '';
-  
-  if(visibility === 'specific') {
-    assignedTo = el('assignUser').value;
-    if(!assignedTo) {
-      alert('Выберите пользователя');
-      return;
-    }
-  }
-  
-  await api('/notes',{method:'POST', body: JSON.stringify({title:t,desc:d,user:current,image:img,assignedTo:assignedTo})});
-  el('title').value=''; el('desc').value=''; el('image').value='';
-  document.querySelector('input[name="visibility"][value="all"]').checked = true;
-  el('assignUser').style.display = 'none';
-  el('assignUser').value = '';
-  loadNotes();
-}
-
-function fileToDataURL(file){ return new Promise(res=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.readAsDataURL(file); }); }
-
-async function downloadNoteFiles(note){
-  const text = `Название: ${note.title}\nАвтор: ${note.user}\n\nОписание:\n${note.desc}`;
-  const blob = new Blob([text], {type: 'text/plain'});
-  const a1 = document.createElement('a'); a1.href = URL.createObjectURL(blob); a1.download = (note.title||'note').replace(/\s+/g,'_') + '.txt'; a1.click(); URL.revokeObjectURL(a1.href);
-  if(note.image){
-    const parts = note.image.split(','); const meta = parts[0]; const b64 = parts[1] || '';
-    const mime = (meta.match(/data:(.*);base64/) || [null,'image/png'])[1]; const ext = mime.split('/')[1] || 'png';
-    const byteChars = atob(b64); const byteNumbers = new Array(byteChars.length); for(let i=0;i<byteChars.length;i++) byteNumbers[i]=byteChars.charCodeAt(i);
-    const byteArray = new Uint8Array(byteNumbers); const blobImg = new Blob([byteArray], {type: mime}); const a2 = document.createElement('a'); a2.href = URL.createObjectURL(blobImg); a2.download = (note.title||'note').replace(/\s+/g,'_') + '.' + ext; a2.click(); URL.revokeObjectURL(a2.href);
-  }
-}
-
-async function adminPost(path, payload){
-  payload = payload || {}; payload.admin_login = current; payload.admin_password = currentPass;
-  const r = await api(path, {method:'POST', body: JSON.stringify(payload)}); return r;
-}
-
+// ===== АДМИНИСТРИРОВАНИЕ =====
 async function loadUsers(){
-  const r = await adminPost('/admin/users/list', {}); const u = await r.json(); const div = el('usersList'); div.innerHTML='';
-  for(const k of Object.keys(u)) div.innerHTML += `<div>${k} — ${u[k].role}</div>`;
+  try{
+    const r = await adminPost('/admin/users/list', {});
+    const u = await r.json();
+    const div = el('usersList');
+    div.innerHTML='';
+    for(const k of Object.keys(u)) {
+      const item = document.createElement('div');
+      item.style.padding='6px 0';
+      item.style.borderBottom='1px solid var(--input-border)';
+      item.textContent = escapeHtml(k) + ' — ' + escapeHtml(u[k].role);
+      div.appendChild(item);
+    }
+  }catch(e){ console.error(e); }
+}
+
+async function loadUsersList(){
+  try{
+    const r = await adminPost('/admin/users/list', {});
+    const u = await r.json();
+  }catch(e){ console.error(e); }
 }
 
 async function saveUser(){
   const login = el('u_login').value.trim(), pass = el('u_pass').value, roleSel = el('u_role').value;
   if(!login){ alert('Введите логин'); return; }
-  const payload = {login: login, role: roleSel}; if(pass) payload.password = pass;
-  const r = await adminPost('/admin/users/add_or_update', payload); const j = await r.json(); if(!r.ok) alert(j.error || 'Ошибка'); else { loadUsers(); loadUsersList(); el('u_login').value=''; el('u_pass').value=''; }
+  const payload = {login: login, role: roleSel};
+  if(pass) payload.password = pass;
+  try{
+    const r = await adminPost('/admin/users/add_or_update', payload);
+    const j = await r.json();
+    if(!r.ok) alert(j.error || 'Ошибка');
+    else { loadUsers(); el('u_login').value=''; el('u_pass').value=''; }
+  }catch(e){ console.error(e); }
 }
 
 async function delUser(){
-  const login = el('del_login').value.trim(); if(!login) return alert('Введите логин');
-  const r = await adminPost('/admin/users/delete', {login}); const j = await r.json(); if(!r.ok) alert(j.error||'Ошибка'); else { loadUsers(); loadUsersList(); el('del_login').value=''; }
+  const login = el('del_login').value.trim();
+  if(!login) return alert('Введите логин');
+  try{
+    const r = await adminPost('/admin/users/delete', {login});
+    const j = await r.json();
+    if(!r.ok) alert(j.error||'Ошибка');
+    else { loadUsers(); el('del_login').value=''; }
+  }catch(e){ console.error(e); }
 }
-
-async function editNotePrompt(idx,note){
-  const newTitle = prompt('Новое название', note.title); if(newTitle===null) return;
-  const newDesc = prompt('Новое описание', note.desc); if(newDesc===null) return;
-  const changeImg = confirm('Заменить изображение? OK — выбрать, Cancel — оставить прежнее');
-  let newImage = undefined;
-  if(changeImg){
-    const f = await pickFile(); if(f) newImage = await fileToDataURL(f);
-  }
-  const payload = {index: idx, title: newTitle, desc: newDesc}; if(newImage!==undefined) payload.image = newImage;
-  const r = await adminPost('/admin/notes/update', payload); const j = await r.json(); if(!r.ok) alert(j.error||'Ошибка'); else loadNotes();
-}
-
-function pickFile(){ return new Promise(res=>{ const inp = document.createElement('input'); inp.type='file'; inp.accept='image/*'; inp.onchange=()=>res(inp.files[0]||null); inp.click(); }); }
 
 async function loadTheme(){
-  try{ const r = await api('/admin/settings/theme'); const j = await r.json(); el('themeSel').value = j.theme || 'light'; applyTheme(j.theme||'light'); }catch(e){ applyTheme('light'); }
+  try{
+    const r = await api('/admin/settings/theme');
+    const j = await r.json();
+    el('themeSel').value = j.theme || 'light';
+    applyTheme(j.theme||'light');
+  }catch(e){ applyTheme('light'); }
 }
-async function changeTheme(){ const theme = el('themeSel').value; await adminPost('/admin/settings/theme', {theme}); applyTheme(theme); }
+
+async function changeTheme(){
+  const theme = el('themeSel').value;
+  try{
+    await adminPost('/admin/settings/theme', {theme});
+    applyTheme(theme);
+  }catch(e){ console.error(e); }
+}
+
 function applyTheme(theme){
-  if(theme==='dark'){ 
-    document.documentElement.style.setProperty('--bg', 'var(--bg-dark)'); 
-    document.documentElement.style.setProperty('--fg','var(--fg-dark)'); 
+  if(theme==='dark'){
+    document.documentElement.style.setProperty('--bg', 'var(--bg-dark)');
+    document.documentElement.style.setProperty('--fg','var(--fg-dark)');
     document.documentElement.style.setProperty('--card','var(--card-dark)');
     document.documentElement.style.setProperty('--input-bg','var(--input-bg-dark)');
     document.documentElement.style.setProperty('--input-fg','var(--input-fg-dark)');
     document.documentElement.style.setProperty('--input-border','var(--input-border-dark)');
-  }
-  else { 
-    document.documentElement.style.setProperty('--bg', 'var(--bg-light)'); 
-    document.documentElement.style.setProperty('--fg','var(--fg-light)'); 
+  } else {
+    document.documentElement.style.setProperty('--bg', 'var(--bg-light)');
+    document.documentElement.style.setProperty('--fg','var(--fg-light)');
     document.documentElement.style.setProperty('--card','var(--card-light)');
     document.documentElement.style.setProperty('--input-bg','var(--input-bg-light)');
     document.documentElement.style.setProperty('--input-fg','var(--input-fg-light)');
@@ -495,96 +622,311 @@ function applyTheme(theme){
   }
 }
 
-applyTheme('light');
+el('saveUserBtn').addEventListener('click', saveUser);
+el('delUserBtn').addEventListener('click', delUser);
+el('themeSel').addEventListener('change', changeTheme);
+el('loadResultsBtn').addEventListener('click', async ()=>{
+  try{
+    const r = await adminPost('/admin/results', {});
+    const j = await r.json();
+    const div = el('resultsList');
+    div.innerHTML='';
+    if(Array.isArray(j)) {
+      j.forEach(res=> {
+        const item = document.createElement('div');
+        item.style.padding='6px 0';
+        item.style.borderBottom='1px solid var(--input-border)';
+        item.textContent = escapeHtml(res.user) + ' — тест #' + res.test_id + ': ' + res.score + '/' + res.total;
+        div.appendChild(item);
+      });
+    }
+  }catch(e){ console.error(e); }
+});
 
-// --- Tests frontend ---
+// ===== ТЕСТЫ =====
 async function loadTests(){
   try{
-    const r = await api('/tests'); const arr = await r.json();
-    const list = el('testsList'); list.innerHTML='';
+    const r = await api('/tests');
+    const arr = await r.json();
+    const list = el('testsList');
+    list.innerHTML='';
     arr.forEach((t)=>{
-      const card = document.createElement('div'); card.className='note-card';
-      card.innerHTML = `<h4>${escapeHtml(t.title)} <span class="small">(#${t.id||''})</span></h4><p class="small">${t.questions.length} вопросов</p>`;
-      const btn = document.createElement('button'); btn.className='btn ghost'; btn.textContent='Пройти'; btn.onclick = ()=>startTest(t);
-      card.appendChild(btn); list.appendChild(card);
+      const card = document.createElement('div');
+      card.className='note-card';
+      const desc = t.desc ? `<p>${escapeHtml(t.desc)}</p>` : '';
+      card.innerHTML = `<h4>${escapeHtml(t.title)}</h4>${desc}<p class="small">${t.questions.length} вопросов</p>`;
+      const btn = document.createElement('button');
+      btn.className='btn ghost';
+      btn.textContent='Пройти тест';
+      btn.style.width='100%';
+      btn.style.marginTop='8px';
+      btn.onclick = ()=>startTestUI(t);
+      card.appendChild(btn);
+
+      if(role==='admin'){
+        const delBtn = document.createElement('button');
+        delBtn.className='btn danger';
+        delBtn.textContent='Удалить';
+        delBtn.style.width='100%';
+        delBtn.style.marginTop='8px';
+        delBtn.onclick = async ()=>{
+          if(!confirm('Удалить тест?')) return;
+          try{
+            await adminPost('/admin/tests/delete', {id: t.id});
+            loadTests();
+          }catch(e){ console.error(e); }
+        };
+        card.appendChild(delBtn);
+      }
+
+      list.appendChild(card);
     });
   }catch(e){ console.error(e); }
 }
 
-function startTest(test){
-  const answers = [];
-  for(let i=0;i<test.questions.length;i++){
-    const q = test.questions[i] || {};
-    const qtext = (q.q || q.question || q.text || '') + '';
-    const rawChoices = Array.isArray(q.choices) ? q.choices : [];
-    const choices = rawChoices.map(c=>{
-      if (c === null || c === undefined) return '';
-      if (typeof c === 'object') {
-        return (c.text || c.label || c.choice || JSON.stringify(c));
-      }
-      return String(c);
-    }).filter(s => s !== '');
-    if(choices.length > 0){
-      const promptText = (i+1)+'. '+qtext+'\n'+choices.map((c,idx)=>idx+': '+c).join('\n');
-      const choice = prompt(promptText);
-      if(choice===null){ alert('Тест отменён'); return; }
-      const trimmed = choice.trim();
-      let num = parseInt(trimmed);
-      if(isNaN(num)){
-        const lowered = trimmed.toLowerCase();
-        const matchIdx = choices.findIndex(c => (c+'').toLowerCase() === lowered);
-        if(matchIdx !== -1){
-          num = matchIdx;
-        } else {
-          const partial = choices.findIndex(c => (c+'').toLowerCase().includes(lowered) || lowered.includes((c+'').toLowerCase()));
-          if(partial !== -1){
-            num = partial;
-          } else {
-            num = -1;
-          }
-        }
-      }
-      answers.push(isNaN(num)?-1:num);
-    } else {
-      const free = prompt((i+1)+'. '+qtext+'\n(Введите ответ)');
-      if(free===null){ alert('Тест отменён'); return; }
-      answers.push(-1);
-    }
-  }
-  (async ()=>{
-    const r = await api('/tests/submit', {method:'POST', body: JSON.stringify({test_id: test.id, answers: answers, user: current})});
-    const j = await r.json();
-    alert('Результат: '+j.score+'/'+j.total);
-  })();
+function startTestUI(test){
+  currentTestData = test;
+  currentQuestionIndex = 0;
+  testAnswers = new Array(test.questions.length).fill(null);
+  el('testModal').classList.add('active');
+  el('testModalTitle').textContent = test.title;
+  el('totalQuestions').textContent = test.questions.length;
+  el('testResultContainer').innerHTML = '';
+  el('testResultContainer').style.display = 'none';
+  el('testQuestionsContainer').style.display = 'block';
+  renderTestQuestion();
 }
 
-el('saveTestBtn')?.addEventListener('click', async ()=>{
-  const title = el('testTitle').value.trim();
-  const qsText = el('testQuestions').value.trim();
-  if(!title || !qsText){ alert('Заполните поля'); return; }
-  let qs;
-  try{ qs = JSON.parse(qsText); }catch(e){ alert('Неверный JSON'); return; }
-  const test = {title: title, questions: qs};
-  const r = await adminPost('/admin/tests/add_or_update', {test}); const j = await r.json();
-  if(!r.ok) alert(j.error||'Ошибка'); else { alert('Сохранено. ID: '+j.id); el('testTitle').value=''; el('testQuestions').value=''; loadTests(); }
+function renderTestQuestion(){
+  const questions = currentTestData.questions;
+  const q = questions[currentQuestionIndex];
+  const container = el('testQuestionsContainer');
+  container.innerHTML = '';
+
+  let html = `<div class="question-box">
+    <div class="question-number">Вопрос ${currentQuestionIndex + 1} из ${questions.length}</div>
+    <div class="question-text">${escapeHtml(q.q)}</div>`;
+
+  if(q.image){
+    html += `<img src="${q.image}" class="question-image" alt="Изображение вопроса">`;
+  }
+
+  html += `<div class="answer-options" id="answersContainer"></div></div>`;
+  container.innerHTML = html;
+
+  const answersContainer = el('answersContainer');
+  q.choices.forEach((choice, idx) => {
+    const isSelected = testAnswers[currentQuestionIndex] === idx;
+    const inputId = `ans_${idx}`;
+
+    let optionHtml = `<label class="answer-option ${isSelected ? 'selected' : ''}">
+      <input type="radio" id="${inputId}" name="answer" value="${idx}" ${isSelected ? 'checked' : ''}>
+      <div class="answer-text">${escapeHtml(choice)}</div>
+    </label>`;
+
+    answersContainer.innerHTML += optionHtml;
+  });
+
+  document.querySelectorAll('input[name="answer"]').forEach(input => {
+    input.addEventListener('change', (e)=>{
+      testAnswers[currentQuestionIndex] = parseInt(e.target.value);
+      document.querySelectorAll('.answer-option').forEach(opt => opt.classList.remove('selected'));
+      e.target.closest('.answer-option').classList.add('selected');
+    });
+  });
+
+  updateButtons();
+  updateProgress();
+}
+
+function updateProgress(){
+  const progress = ((currentQuestionIndex + 1) / currentTestData.questions.length) * 100;
+  el('progressFill').style.width = progress + '%';
+  el('currentQuestion').textContent = currentQuestionIndex + 1;
+}
+
+function updateButtons(){
+  el('prevBtn').disabled = currentQuestionIndex === 0;
+  el('nextBtn').style.display = currentQuestionIndex < currentTestData.questions.length - 1 ? 'block' : 'none';
+  el('submitBtn').style.display = currentQuestionIndex === currentTestData.questions.length - 1 ? 'block' : 'none';
+}
+
+el('prevBtn').addEventListener('click', ()=>{
+  if(currentQuestionIndex > 0){
+    currentQuestionIndex--;
+    renderTestQuestion();
+  }
 });
 
-el('delTestBtn')?.addEventListener('click', async ()=>{
-  const id = parseInt(el('delTestId').value);
-  if(!id){ alert('Введите ID'); return; }
-  const r = await adminPost('/admin/tests/delete', {id}); const j = await r.json();
-  if(!r.ok) alert(j.error||'Ошибка'); else { alert('Удалено'); el('delTestId').value=''; loadTests(); }
+el('nextBtn').addEventListener('click', ()=>{
+  if(currentQuestionIndex < currentTestData.questions.length - 1){
+    currentQuestionIndex++;
+    renderTestQuestion();
+  }
 });
 
-el('loadResultsBtn')?.addEventListener('click', async ()=>{
-  const r = await adminPost('/admin/results', {}); const j = await r.json();
-  const div = el('resultsList'); div.innerHTML='';
-  if(Array.isArray(j)) j.forEach(res=> div.innerHTML += `<div>${res.user} — тест ${res.test_id} ${res.score}/${res.total}</div>`);
+el('submitBtn').addEventListener('click', async ()=>{
+  try{
+    const r = await api('/tests/submit', {
+      method:'POST',
+      body: JSON.stringify({
+        test_id: currentTestData.id,
+        answers: testAnswers,
+        user: current
+      })
+    });
+    const result = await r.json();
+    showTestResult(result);
+  }catch(e){ console.error(e); alert('Ошибка отправки'); }
 });
 
-setTimeout(()=>{ if(document.getElementById('testsList')) loadTests(); }, 600);
+function showTestResult(result){
+  el('testQuestionsContainer').style.display = 'none';
 
-// --- end tests frontend ---
+  let percentage = result.percentage || 0;
+  let message = '';
+  if(percentage >= 80) message = '🎉 Отлично!';
+  else if(percentage >= 60) message = '👍 Хорошо!';
+  else if(percentage >= 40) message = '⚠️ Нужно повторить';
+  else message = '❌ Нужно больше практики';
+
+  let html = `<div class="test-result">
+    <h3>Тест завершён!</h3>
+    <div class="result-score">${result.score}/${result.total}</div>
+    <div style="font-size:18px;color:var(--muted);margin-bottom:16px">${percentage}%</div>
+    <div style="font-size:16px">${message}</div>
+  </div>`;
+
+  el('testResultContainer').innerHTML = html;
+  el('testResultContainer').style.display = 'block';
+
+  el('prevBtn').style.display = 'none';
+  el('nextBtn').style.display = 'none';
+  el('submitBtn').style.display = 'none';
+  el('closeTestBtn').style.display = 'block';
+}
+
+el('closeTestBtn').addEventListener('click', ()=>{
+  el('testModal').classList.remove('active');
+  el('testResultContainer').style.display = 'none';
+  el('testQuestionsContainer').style.display = 'block';
+  el('testResultContainer').innerHTML = '';
+  el('prevBtn').style.display = 'block';
+  el('closeTestBtn').style.display = 'none';
+});
+
+// ===== TEST WIZARD =====
+el('createTestBtn')?.addEventListener('click', ()=>{
+  wizardQuestions = [];
+  el('wizTestTitle').value = '';
+  el('wizTestDesc').value = '';
+  showWizardStep(1);
+  el('wizardModal').classList.add('active');
+});
+
+el('closeWizardBtn').addEventListener('click', ()=>el('wizardModal').classList.remove('active'));
+
+function showWizardStep(step){
+  document.querySelectorAll('.wizard-step').forEach(s=>s.classList.remove('active'));
+  el('step'+step).classList.add('active');
+}
+
+function nextWizardStep(){
+  const title = el('wizTestTitle').value.trim();
+  if(!title){ alert('Введите название теста'); return; }
+  showWizardStep(2);
+  renderQuestionsWiz();
+}
+
+function prevWizardStep(){
+  showWizardStep(1);
+}
+
+function addQuestionToWiz(){
+  const q = prompt('Текст вопроса:');
+  if(!q) return;
+
+  const c = prompt('Варианты ответов (через запятую):');
+  if(!c) return;
+
+  const a = prompt('Номер правильного ответа (1,2,3...):', '1');
+  if(!a) return;
+
+  const idx = parseInt(a) - 1;
+  const choices = c.split(',').map(x=>x.trim());
+
+  if(idx < 0 || idx >= choices.length){
+    alert('Неверный номер ответа');
+    return;
+  }
+
+  wizardQuestions.push({
+    q: q,
+    choices: choices,
+    type: 'single',
+    answers: [idx],
+    image: ''
+  });
+
+  renderQuestionsWiz();
+}
+
+function renderQuestionsWiz(){
+  const div = el('questionsListWiz');
+  div.innerHTML = '';
+  wizardQuestions.forEach((q, idx) => {
+    const item = document.createElement('div');
+    item.style.padding = '12px';
+    item.style.background = 'rgba(11,94,168,0.05)';
+    item.style.borderRadius = '8px';
+    item.style.marginBottom = '8px';
+    item.style.borderLeft = '4px solid var(--primary)';
+
+    const choices = q.choices.map((c, i) =>
+      `${i+1}. ${escapeHtml(c)}${q.answers.includes(i) ? ' ✓' : ''}`
+    ).join('<br>');
+
+    item.innerHTML = `
+      <strong>Вопрос ${idx+1}:</strong> ${escapeHtml(q.q)}<br>
+      <div style="font-size:12px;margin-top:8px;color:var(--muted)">${choices}</div>
+      <button class="btn danger" style="width:100%;margin-top:8px;padding:6px" onclick="deleteQuestionWiz(${idx})">Удалить</button>
+    `;
+    div.appendChild(item);
+  });
+}
+
+function deleteQuestionWiz(idx){
+  wizardQuestions.splice(idx, 1);
+  renderQuestionsWiz();
+}
+
+async function finishWizard(){
+  const title = el('wizTestTitle').value.trim();
+
+  if(!title || wizardQuestions.length === 0){
+    alert('Заполните название и добавьте вопросы');
+    return;
+  }
+
+  const test = {
+    title: title,
+    desc: el('wizTestDesc').value.trim(),
+    questions: wizardQuestions
+  };
+
+  try{
+    const r = await adminPost('/admin/tests/add_or_update', {test});
+    const j = await r.json();
+    if(!r.ok) alert(j.error||'Ошибка');
+    else {
+      alert('✅ Тест сохранен!');
+      el('wizardModal').classList.remove('active');
+      loadTests();
+    }
+  }catch(e){ console.error(e); alert('Ошибка сохранения'); }
+}
+
+applyTheme('light');
 </script>
 </body>
 </html>
