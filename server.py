@@ -503,6 +503,87 @@ def admin_results():
         return jsonify({"error": "admin auth required"}), 403
     return jsonify(results)
 
+# === ДОБАВЛЕНО: работа с материалами ===
+
+def load_materials():
+    with open("materials.json", "r", encoding="utf-8") as f:
+        return json.load(f)
+
+def save_materials(data):
+    with open("materials.json", "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+
+
+# === ДОБАВЛЕНО: редактирование материала ===
+@app.route("/edit_material", methods=["POST"])
+def edit_material():
+    data = request.json
+    username = data.get("username")
+    role = data.get("role")
+    material_id = data.get("id")
+    new_content = data.get("content")
+
+    materials = load_materials()
+
+    for m in materials:
+        if m["id"] == material_id:
+
+            # ученик может редактировать только свой материал
+            if role != "admin" and m.get("owner") != username:
+                return jsonify({"error": "Нет доступа"}), 403
+
+            m["content"] = new_content
+            save_materials(materials)
+            return jsonify({"success": True})
+
+    return jsonify({"error": "Материал не найден"}), 404
+
+
+# === ДОБАВЛЕНО: назначение материала пользователю (ТОЛЬКО АДМИН) ===
+@app.route("/assign_material", methods=["POST"])
+def assign_material():
+    data = request.json
+    role = data.get("role")
+
+    if role != "admin":
+        return jsonify({"error": "Только админ может назначать"}), 403
+
+    material_id = data.get("id")
+    target_user = data.get("target_user")
+
+    materials = load_materials()
+
+    for m in materials:
+        if m["id"] == material_id:
+            m["assigned_to"] = target_user
+            save_materials(materials)
+            return jsonify({"success": True})
+
+    return jsonify({"error": "Материал не найден"}), 404
+
+
+# === ДОБАВЛЕНО: выдача материалов с учетом прав ===
+@app.route("/get_materials", methods=["POST"])
+def get_materials():
+    data = request.json
+    username = data.get("username")
+    role = data.get("role")
+
+    materials = load_materials()
+
+    # админ видит всё
+    if role == "admin":
+        return jsonify(materials)
+
+    # ученик видит только:
+    # - свои
+    # - назначенные ему
+    visible = [
+        m for m in materials
+        if m.get("owner") == username or m.get("assigned_to") == username
+    ]
+
+    return jsonify(visible)
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
