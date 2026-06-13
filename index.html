@@ -2,202 +2,940 @@
 <html lang="ru">
 <head>
   <meta charset="utf-8" />
-  <title>Учитель Онлайн V3.5.5</title>
+  <title>Учитель Онлайн V6.0.0</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <style>
     * { box-sizing: border-box; }
     :root{
-      --bg-light: #f4f6f9;
-      --fg-light: #222;
-      --card-light: #fff;
-      --bg-dark: #1a1f36;
-      --fg-dark: #e8eef7;
-      --card-dark: #252d48;
-      --input-bg-light: #fff;
-      --input-bg-dark: #1a2236;
-      --input-fg-light: #222;
+      --bg-light: #f8fafb;
+      --fg-light: #1a1a1a;
+      --card-light: #ffffff;
+      --bg-dark: #0f1419;
+      --fg-dark: #e4e6eb;
+      --card-dark: #1e2329;
+      --input-bg-light: #f5f5f5;
+      --input-bg-dark: #0f1419;
+      --input-fg-light: #1a1a1a;
       --input-fg-dark: #d4dce9;
-      --input-border-light: #d1d5db;
-      --input-border-dark: #3a4556;
-      --primary: #0b5ea8;
-      --muted: #8b92a9;
-      --success: #16a34a;
-      --danger: #dc2626;
+      --input-border-light: #e0e0e0;
+      --input-border-dark: #2a3f5f;
+      --primary: #1f7adb;
+      --primary-dark: #0d47a1;
+      --muted: #999;
+      --success: #27ae60;
+      --danger: #e74c3c;
+      --warning: #f39c12;
     }
-    html,body{height:100%;margin:0;font-family:"Segoe UI",Tahoma,Geneva,Verdana,sans-serif;background:var(--bg);color:var(--fg)}
-    .container{max-width:1100px;margin:20px auto;padding:16px}
-    header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:20px}
-    h1{margin:0;font-size:24px;font-weight:600}
-    .card{background:var(--card);padding:20px;border-radius:12px;box-shadow:0 4px 12px rgba(11,94,168,0.08)}
-    input,textarea,select,button{padding:10px 12px;border-radius:8px;border:1px solid var(--input-border);font-size:14px;background:var(--input-bg);color:var(--input-fg);font-family:inherit}
+    html,body{height:100%;margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--fg)}
+    body.light-theme{--bg:var(--bg-light);--fg:var(--fg-light);--card:var(--card-light);--input-bg:var(--input-bg-light);--input-fg:var(--input-fg-light);--input-border:var(--input-border-light)}
+    body.dark-theme{--bg:var(--bg-dark);--fg:var(--fg-dark);--card:var(--card-dark);--input-bg:var(--input-bg-dark);--input-fg:var(--input-fg-dark);--input-border:var(--input-border-dark)}
+    .container{max-width:1200px;margin:0 auto;padding:20px}
+    header{display:flex;justify-content:space-between;align-items:center;gap:20px;margin-bottom:30px;padding-bottom:20px;border-bottom:2px solid var(--input-border)}
+    h1{margin:0;font-size:28px;font-weight:700;color:var(--primary)}
+    .tabs{display:flex;gap:5px;margin-bottom:20px;border-bottom:2px solid var(--input-border);flex-wrap:wrap}
+    .tab-btn{background:transparent;border:none;padding:12px 20px;cursor:pointer;font-size:14px;font-weight:600;color:var(--muted);border-bottom:3px solid transparent;transition:all 0.3s;position:relative;top:2px}
+    .tab-btn.active{color:var(--primary);border-bottom-color:var(--primary)}
+    .tab-content{display:none}
+    .tab-content.active{display:block}
+    .card{background:var(--card);padding:24px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.08);margin-bottom:20px}
+    input,textarea,select,button{padding:12px 14px;border-radius:8px;border:1px solid var(--input-border);font-size:14px;background:var(--input-bg);color:var(--input-fg);font-family:inherit}
     input,textarea,select{width:100%;margin-top:8px}
-    textarea{min-height:90px;resize:vertical}
-    .note-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-top:12px}
-    .note-card{background:var(--card);padding:16px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.1);transition:transform 0.2s}
-    .note-card:hover{transform:translateY(-4px)}
-    .note-card h4{margin:0 0 8px 0;font-size:16px;font-weight:600}
-    .note-card p{margin:0;color:var(--muted);font-size:13px;line-height:1.5}
-    .btn{background:var(--primary);color:#fff;border:none;padding:10px 16px;border-radius:8px;cursor:pointer;font-weight:500;transition:background 0.2s;display:inline-block}
-    .btn:hover{background:#0a4a8a}
+    textarea{min-height:100px;resize:vertical}
+    .note-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;margin-top:16px}
+    .note-card{background:var(--card);padding:18px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.08);transition:all 0.3s;border:1px solid var(--input-border);cursor:pointer}
+    .note-card:hover{transform:translateY(-4px);box-shadow:0 4px 16px rgba(31,122,219,0.12)}
+    .note-card h4{margin:0 0 8px 0;font-size:16px;font-weight:600;color:var(--primary)}
+    .note-card p{margin:0;color:var(--muted);font-size:13px;line-height:1.6}
+    .badge{display:inline-block;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;margin-top:8px}
+    .badge-class{background:rgba(31,122,219,0.15);color:var(--primary)}
+    .btn{background:var(--primary);color:#fff;border:none;padding:12px 18px;border-radius:8px;cursor:pointer;font-weight:600;transition:all 0.3s;display:inline-block;font-size:14px}
+    .btn:hover{background:var(--primary-dark);transform:translateY(-2px)}
+    .btn:active{transform:translateY(0)}
     .btn.ghost{background:transparent;color:var(--primary);border:1px solid var(--primary)}
-    .btn.ghost:hover{background:rgba(11,94,168,0.1)}
-    .btn.danger{background:var(--danger);color:#fff}
-    .btn.danger:hover{background:#b91c1c}
-    .btn.success{background:var(--success);color:#fff}
-    .btn.success:hover{background:#15803d}
-    .btn.block{display:block;width:100%}
-    .btn.small{padding:6px 12px;font-size:12px}
-    .small{font-size:12px;color:var(--muted);margin-top:6px}
-    footer{margin-top:20px;text-align:center;color:var(--muted);font-size:12px}
-    .btn-group{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+    .btn.ghost:hover{background:rgba(31,122,219,0.08)}
+    .btn.danger{background:var(--danger)}
+    .btn.danger:hover{background:#c0392b}
+    .btn.success{background:var(--success)}
+    .btn.success:hover{background:#229954}
+    .btn.warning{background:var(--warning)}
+    .btn.warning:hover{background:#d68910}
+    .btn.block{display:block;width:100%;margin-top:12px}
+    .btn.small{padding:8px 12px;font-size:12px}
+    .btn-group{display:flex;gap:12px;margin-top:12px;flex-wrap:wrap}
     .btn-group .btn{flex:1;min-width:100px}
-    .edit-modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center;padding:20px;overflow-y:auto}
-    .edit-modal.active{display:flex}
-    .edit-container{background:var(--card);border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,0.3);width:100%;max-width:600px;padding:32px;margin:20px auto}
-    .close-edit{position:absolute;top:16px;right:16px;background:none;border:none;font-size:28px;cursor:pointer;color:var(--muted)}
-    .test-modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center;padding:20px}
-    .test-modal.active{display:flex}
-    .test-container{background:var(--card);border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,0.3);width:100%;max-width:700px;max-height:90vh;display:flex;flex-direction:column;overflow:hidden}
-    .test-header{background:linear-gradient(135deg,var(--primary),#0a4a8a);color:white;padding:24px}
-    .test-title{margin:0;font-size:20px;font-weight:600}
-    .test-progress{margin-top:12px;font-size:13px;opacity:0.9}
-    .progress-bar{width:100%;height:6px;background:rgba(255,255,255,0.2);border-radius:3px;margin-top:8px;overflow:hidden}
-    .progress-fill{height:100%;background:rgba(255,255,255,0.8);border-radius:3px;transition:width 0.3s}
-    .test-content{flex:1;padding:24px;overflow-y:auto}
-    .question-box{margin-bottom:0}
-    .question-number{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;font-weight:600;margin-bottom:8px}
-    .question-text{font-size:16px;font-weight:600;margin:0 0 16px 0;color:var(--fg);word-wrap:break-word;overflow-wrap:break-word}
-    .question-image{max-width:100%;height:auto;border-radius:8px;margin:16px 0;border:1px solid var(--input-border)}
-    .answer-options{display:flex;flex-direction:column;gap:10px;margin-top:16px}
-    .answer-option{display:flex;align-items:flex-start;gap:12px;padding:12px;border:2px solid var(--input-border);border-radius:8px;cursor:pointer;transition:all 0.2s;background:var(--input-bg)}
-    .answer-option:hover{border-color:var(--primary);background:rgba(11,94,168,0.05)}
-    .answer-option input{margin-top:4px;cursor:pointer;flex-shrink:0}
-    .answer-option.selected{border-color:var(--primary);background:rgba(11,94,168,0.1);font-weight:500}
-    .answer-text{flex:1;font-size:14px;word-wrap:break-word;overflow-wrap:break-word}
-    .test-buttons{display:flex;gap:12px;padding:24px;border-top:1px solid var(--input-border);background:var(--card);flex-wrap:wrap}
-    .test-buttons button{flex:1;min-width:100px}
-    .test-result{text-align:center;padding:40px 20px}
-    .result-score{font-size:48px;font-weight:700;color:var(--primary);margin:20px 0}
-    .wizard-modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center;padding:20px;overflow-y:auto}
-    .wizard-modal.active{display:flex}
-    .wizard-container{background:var(--card);border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,0.3);width:100%;max-width:600px;padding:32px;margin:20px auto}
-    .wizard-step{display:none}
-    .wizard-step.active{display:block}
-    .wizard-step h2{margin-top:0;color:var(--primary)}
-    .close-wizard{position:absolute;top:16px;right:16px;background:none;border:none;font-size:28px;cursor:pointer;color:var(--muted)}
-    .pre-assign-modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center;padding:20px}
-    .pre-assign-modal.active{display:flex}
-    .pre-assign-container{background:var(--card);border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,0.3);width:100%;max-width:500px;padding:32px}
-    .close-pre-assign{position:absolute;top:16px;right:16px;background:none;border:none;font-size:28px;cursor:pointer;color:var(--muted)}
-    @media(max-width:720px){.note-grid{grid-template-columns:repeat(1,1fr)}.test-container{max-width:100%}.wizard-container{padding:20px}.edit-container{padding:20px}.pre-assign-container{padding:20px}.btn-group{flex-direction:column}.btn-group .btn{width:100%}}
+    .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center;padding:20px;overflow-y:auto}
+    .modal.active{display:flex}
+    .modal-content{background:var(--card);border-radius:16px;box-shadow:0 10px 40px rgba(0,0,0,0.2);width:100%;max-width:600px;padding:32px;position:relative}
+    .modal-close{position:absolute;top:16px;right:16px;background:none;border:none;font-size:24px;cursor:pointer;color:var(--muted)}
+    .calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-top:16px}
+    .calendar-day{padding:8px;border:1px solid var(--input-border);border-radius:8px;text-align:center;cursor:pointer;font-size:13px}
+    .calendar-day:hover{background:rgba(31,122,219,0.1)}
+    .calendar-event{padding:12px;background:var(--input-bg);border-left:4px solid var(--primary);border-radius:6px;margin-bottom:8px;font-size:13px}
+    .class-item{padding:16px;background:var(--input-bg);border-radius:8px;margin-bottom:12px;border:1px solid var(--input-border)}
+    .class-item h4{margin:0 0 8px 0;color:var(--primary)}
+    .class-item p{margin:0;color:var(--muted);font-size:13px}
+    .admin-section{background:rgba(31,122,219,0.05);padding:20px;border-radius:12px;border:1px solid var(--primary)}
+    .small{font-size:12px;color:var(--muted);margin-top:6px}
+    .form-row{display:flex;gap:12px;margin-top:12px;flex-wrap:wrap}
+    .form-row input,.form-row select{flex:1;min-width:150px}
+    .tabs-subtabs{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+    .subtab-btn{padding:8px 14px;border-radius:6px;border:1px solid var(--input-border);background:transparent;cursor:pointer;font-size:13px;transition:all 0.3s}
+    .subtab-btn.active{background:var(--primary);color:white;border-color:var(--primary)}
+    @media(max-width:768px){
+      .container{padding:12px}
+      .note-grid{grid-template-columns:1fr}
+      .modal-content{max-width:95%}
+      .form-row{flex-direction:column}
+      header{flex-direction:column;align-items:flex-start}
+      .tabs{flex-direction:column}
+    }
   </style>
 </head>
-<body>
+<body class="light-theme">
   <div class="container">
     <header>
-      <h1>📚 Учитель Онлайн V3.5.5</h1>
+      <h1>📚 Учитель Онлайн V6.0.0</h1>
       <div id="userInfo" class="small"></div>
     </header>
-    <div id="loginBox" class="card login">
+
+    <div id="loginBox" class="card">
       <h3>Вход в систему</h3>
       <input id="login" placeholder="Логин" autocomplete="username">
       <input id="password" type="password" placeholder="Пароль" autocomplete="current-password">
-      <button id="loginBtn" class="btn block" style="margin-top:12px">Войти</button>
+      <button id="loginBtn" class="btn block">Войти</button>
       <div id="loginError" class="small" style="color:var(--danger)"></div>
     </div>
+
     <div id="mainBox" style="display:none">
-      <div class="card notes">
-        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px"><h3>📄 Материалы</h3><button id="logoutBtn" class="btn ghost">Выйти</button></div>
-        <input id="title" placeholder="Название материала">
-        <textarea id="desc" placeholder="Краткое описание"></textarea>
-        <input id="image" type="file" accept="image/*">
-        <div style="display:flex;gap:8px;margin-top:12px"><button id="addNoteBtn" class="btn">Добавить</button><button id="refreshBtn" class="btn ghost">Обновить</button></div>
-        <div id="notesList" class="note-grid"></div>
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('materials')">📄 Материалы</button>
+        <button class="tab-btn" onclick="switchTab('calendar')">📅 Календарь</button>
+        <button class="tab-btn" onclick="switchTab('news')">📰 Новости</button>
+        <button class="tab-btn" onclick="switchTab('guides')">📚 Пособия</button>
+        <button class="tab-btn" onclick="switchTab('tests')">🧪 Тесты</button>
+        <button class="tab-btn" id="adminTabBtn" onclick="switchTab('admin')" style="display:none">⚙️ Панель</button>
       </div>
-      <div class="card news" style="margin-top:16px">
-        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px"><h3>📰 Новости</h3><div id="newsAdminBtn" style="display:none"><button id="addNewsBtn" class="btn">+ Добавить</button></div></div>
-        <div id="newsForm" style="display:none;margin-bottom:16px;padding:12px;background:rgba(0,0,0,0.05);border-radius:8px">
-          <input id="newsTitle" placeholder="Заголовок">
-          <textarea id="newsDesc" placeholder="Содержание"></textarea>
-          <input id="newsImage" type="file" accept="image/*">
-          <div style="display:flex;gap:8px;margin-top:8px"><button id="saveNewsBtn" class="btn">Сохранить</button><button id="cancelNewsBtn" class="btn ghost">Отменить</button></div>
+
+      <!-- МАТЕРИАЛЫ -->
+      <div id="materials" class="tab-content active">
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px">
+            <h3 style="margin:0">Материалы</h3>
+            <button id="logoutBtn" class="btn ghost">Выйти</button>
+          </div>
+          <input id="title" placeholder="Название материала">
+          <textarea id="desc" placeholder="Описание материала"></textarea>
+          <input id="image" type="file" accept="image/*">
+          <label style="margin-top:12px;font-weight:600">Видимость для классов:</label>
+          <select id="classSelect" multiple style="min-height:100px">
+            <option value="">Всем</option>
+          </select>
+          <div class="btn-group">
+            <button id="addNoteBtn" class="btn">Добавить</button>
+            <button id="refreshBtn" class="btn ghost">Обновить</button>
+          </div>
+          <div id="notesList" class="note-grid"></div>
         </div>
-        <div id="newsList" class="note-grid"></div>
       </div>
-      <div class="card guides" style="margin-top:16px">
-        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px"><h3>📚 Пособия</h3><div id="guidesAdminBtn" style="display:none"><button id="addGuideBtn" class="btn">+ Добавить</button></div></div>
-        <div id="guidesForm" style="display:none;margin-bottom:16px;padding:12px;background:rgba(0,0,0,0.05);border-radius:8px">
-          <input id="guideTitle" placeholder="Название">
-          <textarea id="guideDesc" placeholder="Описание"></textarea>
-          <input id="guideImage" type="file" accept="image/*">
-          <div style="display:flex;gap:8px;margin-top:8px"><button id="saveGuideBtn" class="btn">Сохранить</button><button id="cancelGuideBtn" class="btn ghost">Отменить</button></div>
+
+      <!-- КАЛЕНДАРЬ -->
+      <div id="calendar" class="tab-content">
+        <div class="card">
+          <h3>📅 Календарь</h3>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+            <div>
+              <h4>Добавить событие</h4>
+              <input id="eventTitle" placeholder="Название события">
+              <textarea id="eventDesc" placeholder="Описание события" style="min-height:80px"></textarea>
+              <input id="eventDate" type="date">
+              <input id="eventTime" type="time">
+              <label style="margin-top:12px;font-weight:600">Видимость:</label>
+              <select id="eventVisibility">
+                <option value="private">Только мне</option>
+                <option value="public">Всем</option>
+                <option value="class">Выбранным классам</option>
+              </select>
+              <button id="addEventBtn" class="btn block" style="margin-top:12px">Добавить</button>
+            </div>
+            <div>
+              <h4>События</h4>
+              <div id="calendarEventsList" style="max-height:400px;overflow-y:auto"></div>
+            </div>
+          </div>
         </div>
-        <div id="guidesList" class="note-grid"></div>
       </div>
-      <div id="testsPanel" class="card tests" style="margin-top:16px">
-        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px"><h3>🧪 Тесты</h3><div id="testsAdminBtn" style="display:none"><button id="createTestBtn" class="btn">+ Создать тест</button></div></div>
-        <div id="testsList" class="note-grid"></div>
-      </div>
-      <div id="adminPanel" class="card admin" style="display:none;margin-top:16px">
-        <h3>⚙️ Учительская панель</h3>
-        <h4>Управление пользователями</h4>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">
-          <input id="u_login" placeholder="Логин" style="flex:1;min-width:120px">
-          <input id="u_pass" placeholder="Пароль" style="flex:1;min-width:120px">
-          <select id="u_role" style="flex:1;min-width:100px"><option value="student">Ученик</option><option value="admin">Админ</option></select>
-          <button id="saveUserBtn" class="btn">Сохранить</button>
+
+      <!-- НОВОСТИ -->
+      <div id="news" class="tab-content">
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px">
+            <h3 style="margin:0">Новости</h3>
+            <div id="newsAdminBtn" style="display:none">
+              <button id="addNewsBtn" class="btn ghost">+ Добавить</button>
+            </div>
+          </div>
+          <div id="newsForm" style="display:none;margin-bottom:16px;padding:16px;background:rgba(31,122,219,0.05);border-radius:8px">
+            <input id="newsTitle" placeholder="Заголовок">
+            <textarea id="newsDesc" placeholder="Содержание"></textarea>
+            <input id="newsImage" type="file" accept="image/*">
+            <label style="margin-top:12px;font-weight:600">Классы:</label>
+            <select id="newsClasses" multiple style="min-height:80px">
+              <option value="">Всем</option>
+            </select>
+            <div class="btn-group">
+              <button id="saveNewsBtn" class="btn">Сохранить</button>
+              <button id="cancelNewsBtn" class="btn ghost">Отменить</button>
+            </div>
+          </div>
+          <div id="newsList" class="note-grid"></div>
         </div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
-          <input id="del_login" placeholder="Логин для удаления" style="flex:1;min-width:150px">
-          <button id="delUserBtn" class="btn danger">Удалить</button>
-        </div>
-        <div style="display:flex;gap:12px;align-items:center;margin-bottom:12px"><label>Тема:</label><select id="themeSel"><option value="light">Светлая</option><option value="dark">Тёмная</option></select></div>
-        <h4 style="margin-top:16px">Пользователи</h4>
-        <div id="usersList" class="small" style="max-height:150px;overflow-y:auto;border:1px solid var(--input-border);padding:8px;border-radius:8px"></div>
-        <h4 style="margin-top:16px">Результаты тестов</h4>
-        <button id="loadResultsBtn" class="btn ghost" style="margin-bottom:8px">Загрузить результаты</button>
-        <div id="resultsList" class="small" style="max-height:150px;overflow-y:auto"></div>
       </div>
-    </div>
-  </div>
-  <footer class="small">Учитель Онлайн версии 3.5.5TEST. ЛОГИН ПАРОЛЬ ДЛЯ ТЕСТИРОВАНИЯ: логин: admin; пароль: admin123;</footer>
-  <div id="testModal" class="test-modal">
-    <div class="test-container">
-      <div class="test-header"><h2 class="test-title" id="testModalTitle">Тест</h2><div class="test-progress">Вопрос <span id="currentQuestion">1</span> из <span id="totalQuestions">10</span></div><div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div></div>
-      <div class="test-content"><div id="testQuestionsContainer"></div><div id="testResultContainer" style="display:none"></div></div>
-      <div class="test-buttons"><button id="prevBtn" class="btn ghost">← Назад</button><button id="nextBtn" class="btn">Далее →</button><button id="submitBtn" class="btn" style="display:none">✓ Завершить</button><button id="closeTestBtn" class="btn ghost" style="display:none">Закрыть</button></div>
-    </div>
-  </div>
-  <div id="wizardModal" class="wizard-modal">
-    <div class="wizard-container">
-      <button class="close-wizard" id="closeWizardBtn">✕</button>
-      <div class="wizard-step active" id="step1"><h2>Создание теста</h2><label>Название теста:</label><input id="wizTestTitle" placeholder="Введите название"><label style="margin-top:12px">Описание (опционально):</label><textarea id="wizTestDesc" placeholder="Краткое описание"></textarea><button class="btn" style="width:100%;margin-top:16px" onclick="nextWizardStep()">Далее</button></div>
-      <div class="wizard-step" id="step2"><h2>Добавление вопросов</h2><div id="questionsListWiz" style="margin-top:12px;max-height:300px;overflow-y:auto"></div><button class="btn ghost" style="width:100%;margin-top:12px" onclick="addQuestionToWiz()">+ Добавить вопрос</button><div style="display:flex;gap:8px;margin-top:16px"><button class="btn ghost" style="flex:1" onclick="prevWizardStep()">← Назад</button><button class="btn" style="flex:1" onclick="finishWizard()">💾 Сохранить</button></div></div>
-    </div>
-  </div>
-  <div id="editModal" class="edit-modal">
-    <div class="edit-container">
-      <button class="close-edit" id="closeEditBtn">✕</button>
-      <h2>Редактирование материала</h2>
-      <label>Название:</label><input id="editTitle" placeholder="Название материала">
-      <label style="margin-top:12px">Описание:</label><textarea id="editDesc" placeholder="Краткое описание"></textarea>
-      <label style="margin-top:12px">Изображение/Файл:</label><input id="editImage" type="file" accept="image/*">
-      <div style="display:flex;gap:8px;margin-top:16px"><button class="btn ghost" style="flex:1" onclick="closeEditMaterial()">Отменить</button><button class="btn" style="flex:1" id="saveEditBtn" onclick="saveEditedMaterial()">💾 Сохранить</button></div>
-    </div>
-  </div>
-  <div id="preAssignModal" class="pre-assign-modal">
-    <div class="pre-assign-container">
-      <button class="close-pre-assign" id="closePreAssignBtn">✕</button>
-      <h2 style="color:var(--primary);margin-top:0">👤 Назначить материал ученику</h2>
-      <p style="color:var(--muted);margin:12px 0">Выберите, кому назначить этот материал, или оставьте пусто для всех</p>
-      <label style="font-weight:600">Выберите ученика:</label>
-      <select id="preAssignUserSelect" style="margin-top:8px;width:100%;padding:10px;border-radius:8px;border:1px solid var(--input-border)"><option value="">📢 Всем (видно всем пользователям)</option></select>
-      <div style="display:flex;gap:8px;margin-top:20px"><button class="btn ghost" style="flex:1" onclick="cancelPreAssign()">Отменить</button><button class="btn" style="flex:1" id="confirmPreAssignBtn" onclick="confirmPreAssign()">✓ Добавить материал</button></div>
+
+      <!-- ПОСОБИЯ -->
+      <div id="guides" class="tab-content">
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px">
+            <h3 style="margin:0">Пособия</h3>
+            <div id="guidesAdminBtn" style="display:none">
+              <button id="addGuideBtn" class="btn ghost">+ Добавить</button>
+            </div>
+          </div>
+          <div id="guidesForm" style="display:none;margin-bottom:16px;padding:16px;background:rgba(31,122,219,0.05);border-radius:8px">
+            <input id="guideTitle" placeholder="Название">
+            <textarea id="guideDesc" placeholder="Описание"></textarea>
+            <input id="guideImage" type="file" accept="image/*">
+            <label style="margin-top:12px;font-weight:600">Классы:</label>
+            <select id="guideClasses" multiple style="min-height:80px">
+              <option value="">Всем</option>
+            </select>
+            <div class="btn-group">
+              <button id="saveGuideBtn" class="btn">Сохранить</button>
+              <button id="cancelGuideBtn" class="btn ghost">Отменить</button>
+            </div>
+          </div>
+          <div id="guidesList" class="note-grid"></div>
+        </div>
+      </div>
+
+      <!-- ТЕСТЫ -->
+      <div id="tests" class="tab-content">
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px">
+            <h3 style="margin:0">Тесты</h3>
+            <div id="testsAdminBtn" style="display:none">
+              <button id="createTestBtn" class="btn ghost">+ Создать тест</button>
+            </div>
+          </div>
+          <div id="testsList" class="note-grid"></div>
+        </div>
+      </div>
+
+      <!-- ПАНЕЛЬ АДМИНИСТРАТОРА -->
+      <div id="admin" class="tab-content">
+        <div class="card admin-section">
+          <h3>⚙️ Учительская панель</h3>
+
+          <h4 style="margin-top:20px">Управление классами</h4>
+          <div class="form-row">
+            <input id="className" placeholder="Название класса" style="flex:2">
+            <button id="addClassBtn" class="btn">Создать класс</button>
+          </div>
+          <div id="classesList" style="margin-top:16px;max-height:300px;overflow-y:auto"></div>
+
+          <h4 style="margin-top:20px">Управление пользователями</h4>
+          <div class="form-row">
+            <input id="u_login" placeholder="Логин" style="flex:1;min-width:100px">
+            <input id="u_pass" placeholder="Пароль" style="flex:1;min-width:100px">
+            <select id="u_role" style="flex:1;min-width:80px">
+              <option value="student">Ученик</option>
+              <option value="admin">Админ</option>
+            </select>
+            <button id="saveUserBtn" class="btn">Сохранить</button>
+          </div>
+          <div class="form-row">
+            <input id="del_login" placeholder="Логин для удаления" style="flex:1;min-width:150px">
+            <button id="delUserBtn" class="btn danger">Удалить</button>
+          </div>
+
+          <h4 style="margin-top:20px">Тема оформления</h4>
+          <div class="form-row">
+            <select id="themeSel">
+              <option value="light">Светлая</option>
+              <option value="dark">Тёмная</option>
+            </select>
+            <button id="themeBtn" class="btn">Применить</button>
+          </div>
+
+          <h4 style="margin-top:20px">Пользователи</h4>
+          <div id="usersList" style="max-height:200px;overflow-y:auto;border:1px solid var(--input-border);padding:12px;border-radius:8px;background:var(--input-bg)"></div>
+
+          <h4 style="margin-top:20px">Результаты тестов</h4>
+          <button id="loadResultsBtn" class="btn ghost">Загрузить результаты</button>
+          <div id="resultsList" style="max-height:200px;overflow-y:auto;margin-top:12px"></div>
+        </div>
+      </div>
     </div>
   </div>
 
-<script>
-const API="";let current="",role="",currentPass="";let currentTestData=null;let currentQuestionIndex=0;let testAnswers=[];let wizardQuestions=[];let currentEditIndex=-1;let currentEditIsOwnMaterial=false;let pendingNoteData=null;let isAdminAddingNote=false;function el(id){return document.getElementById(id)}async function api(path,opts){opts=opts||{};opts.headers=opts.headers||{'Content-Type':'application/json'};try{return await fetch(path,opts)}catch(e){throw new Error('Сервер недоступен')}}async function loginAction(){el('loginError').textContent='';const l=el('login').value.trim(),p=el('password').value;if(!l||!p){el('loginError').textContent='Введите логин и пароль';return}try{const r=await api('/login',{method:'POST',body:JSON.stringify({login:l,password:p})});const d=await r.json();if(!d.ok){el('loginError').textContent=d.error||'Ошибка входа';return}current=l;role=d.role;currentPass=p;el('loginBox').style.display='none';el('mainBox').style.display='block';el('userInfo').textContent=current+(role?' ('+role+')':'');if(role==='admin'){el('adminPanel').style.display='block';el('testsAdminBtn').style.display='block';el('newsAdminBtn').style.display='block';el('guidesAdminBtn').style.display='block';loadUsersList();loadUsers();loadAvailableUsers()}loadNotes();loadNews();loadGuides();loadTests();loadTheme()}catch(e){console.error(e);el('loginError').textContent='Ошибка подключения'}}el('loginBtn').addEventListener('click',loginAction);el('password').addEventListener('keypress',(e)=>{if(e.key==='Enter')loginAction()});el('logoutBtn').addEventListener('click',()=>location.reload());function escapeHtml(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}function fileToDataURL(file){return new Promise(res=>{const r=new FileReader();r.onload=()=>res(r.result);r.readAsDataURL(file)})}async function adminPost(path,payload){payload=payload||{};payload.admin_login=current;payload.admin_password=currentPass;return await api(path,{method:'POST',body:JSON.stringify(payload)})}async function loadNotes(){try{const r=await api('/notes');const arr=await r.json();const list=el('notesList');list.innerHTML='';arr.forEach((n,idx)=>{if(role!=='admin'&&n.assignedTo&&n.assignedTo!==current&&n.user!==current){return}const card=document.createElement('div');card.className='note-card';card.innerHTML=`<h4>${escapeHtml(n.title)}</h4><p>${escapeHtml(n.desc)}</p><div class="small">Автор: ${escapeHtml(n.user)}</div>`;if(n.assignedTo){const assignedLabel=document.createElement('div');assignedLabel.className='small';assignedLabel.style.marginTop='6px';assignedLabel.style.color='var(--primary)';assignedLabel.textContent='👤 Назначено: '+escapeHtml(n.assignedTo);card.appendChild(assignedLabel)}if(n.image){const img=document.createElement('img');img.src=n.image;img.style.maxWidth='100%';img.style.marginTop='8px';card.appendChild(img)}const btnGroup=document.createElement('div');btnGroup.className='btn-group';const downloadBtn=document.createElement('button');downloadBtn.className='btn success small';downloadBtn.textContent='📥 Скачать';downloadBtn.onclick=()=>downloadNoteFiles(n);btnGroup.appendChild(downloadBtn);const isOwnMaterial=n.user===current;const canEdit=(role==='admin')||(role==='student'&&isOwnMaterial);if(canEdit){const editBtn=document.createElement('button');editBtn.className='btn small';editBtn.textContent='✏️ Редакт.';editBtn.onclick=()=>openEditMaterial(idx,n,isOwnMaterial);btnGroup.appendChild(editBtn)}if(role==='admin'&&n.assignedTo){const assignBtn=document.createElement('button');assignBtn.className='btn small';assignBtn.style.background='#8b5cf6';assignBtn.textContent='👤 Изм.назнач.';assignBtn.onclick=()=>openAdminAssignModal(idx,n);btnGroup.appendChild(assignBtn);const delBtn=document.createElement('button');delBtn.className='btn danger small';delBtn.textContent='Удалить';delBtn.onclick=async ()=>{if(!confirm('Удалить?'))return;await adminPost('/admin/notes/delete',{index:idx});loadNotes()};btnGroup.appendChild(delBtn)}else if(role==='admin'){const delBtn=document.createElement('button');delBtn.className='btn danger small';delBtn.textContent='Удалить';delBtn.onclick=async ()=>{if(!confirm('Удалить?'))return;await adminPost('/admin/notes/delete',{index:idx});loadNotes()};btnGroup.appendChild(delBtn)}card.appendChild(btnGroup);list.appendChild(card)})}catch(e){console.error(e)}}async function loadAvailableUsers(){try{const r=await adminPost('/admin/users/list',{});const usersData=await r.json();const select=el('preAssignUserSelect');select.innerHTML='<option value="">📢 Всем (видно всем пользователям)</option>';for(const username in usersData){if(usersData[username].role==='student'){const option=document.createElement('option');option.value=username;option.textContent='👤 '+username;select.appendChild(option)}}}catch(e){console.error(e)}}function openAdminAssignModal(idx,note){isAdminAddingNote=false;pendingNoteData=null;currentEditIndex=idx;el('preAssignUserSelect').value=note.assignedTo||'';el('preAssignModal').classList.add('active')}function openPreAssignModal(){isAdminAddingNote=true;currentEditIndex=-1;el('preAssignUserSelect').value='';el('preAssignModal').classList.add('active')}function cancelPreAssign(){el('preAssignModal').classList.remove('active');el('preAssignUserSelect').value='';currentEditIndex=-1;pendingNoteData=null;isAdminAddingNote=false;el('title').value='';el('desc').value='';el('image').value=''}async function confirmPreAssign(){if(isAdminAddingNote&&pendingNoteData){const assignedTo=el('preAssignUserSelect').value;pendingNoteData.assignedTo=assignedTo;try{await api('/notes',{method:'POST',body:JSON.stringify(pendingNoteData)});const msgText=assignedTo?`✅ Материал добавлен и назначен ученику: ${assignedTo}`:'✅ Материал добавлен для всех пользователей';alert(msgText);el('preAssignModal').classList.remove('active');el('preAssignUserSelect').value='';el('title').value='';el('desc').value='';el('image').value='';pendingNoteData=null;isAdminAddingNote=false;loadNotes()}catch(e){console.error(e);alert('Ошибка ��ри добавлении материала')}}else if(!isAdminAddingNote&&currentEditIndex>=0){const assignedTo=el('preAssignUserSelect').value;try{const r=await adminPost('/admin/materials/assign',{index:currentEditIndex,assigned_to:assignedTo});const j=await r.json();if(!r.ok||!j.ok){alert(j.error||'Ошибка при назначении');return}alert('✅ Назначение обновлено');el('preAssignModal').classList.remove('active');currentEditIndex=-1;loadNotes()}catch(e){console.error(e);alert('Ошибка при назначении')}}}el('closePreAssignBtn').addEventListener('click',cancelPreAssign);function openEditMaterial(idx,note,isOwnMaterial){currentEditIndex=idx;currentEditIsOwnMaterial=isOwnMaterial;el('editTitle').value=note.title||'';el('editDesc').value=note.desc||'';el('editImage').value='';el('editModal').classList.add('active')}function closeEditMaterial(){el('editModal').classList.remove('active');el('editTitle').value='';el('editDesc').value='';el('editImage').value='';currentEditIndex=-1;currentEditIsOwnMaterial=false}async function saveEditedMaterial(){if(currentEditIndex<0)return;const newTitle=el('editTitle').value.trim();const newDesc=el('editDesc').value.trim();const fileInput=el('editImage');let newImage='';if(fileInput.files&&fileInput.files[0]){newImage=await fileToDataURL(fileInput.files[0])}try{let r;if(currentEditIsOwnMaterial&&role==='student'){const payload={username:current,index:currentEditIndex,title:newTitle,desc:newDesc};if(newImage){payload.image=newImage}r=await api('/materials/edit',{method:'POST',body:JSON.stringify(payload)})}else if(role==='admin'){const payload={index:currentEditIndex,title:newTitle,desc:newDesc};if(newImage){payload.image=newImage}r=await adminPost('/admin/materials/edit',payload)}else{alert('У вас нет прав на редактирование этого материала');return}const j=await r.json();if(!r.ok||!j.ok){alert(j.error||'Ошибка при редактировании');return}alert('✅ Материал успешно отредактирован');closeEditMaterial();loadNotes()}catch(e){console.error(e);alert('Ошибка при сохранении изменений')}}el('closeEditBtn').addEventListener('click',closeEditMaterial);async function downloadNoteFiles(note){const text=`Название: ${note.title}\nАвтор: ${note.user}\n\nОписание:\n${note.desc}`;const blob=new Blob([text],{type:'text/plain'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=(note.title||'material').replace(/\s+/g,'_')+'.txt';a.click();URL.revokeObjectURL(a.href);if(note.image){try{const response=await fetch(note.image);const blob=await response.blob();const ext=response.headers.get('content-type').split('/')[1]||'png';const a2=document.createElement('a');a2.href=URL.createObjectURL(blob);a2.download=(note.title||'material').replace(/\s+/g,'_')+'.'+ext;a2.click();URL.revokeObjectURL(a2.href)}catch(e){const parts=note.image.split(',');const meta=parts[0];const b64=parts[1]||'';const mime=(meta.match(/data:(.*);base64/)||[null,'image/png'])[1];const ext=mime.split('/')[1]||'png';const byteChars=atob(b64);const byteNumbers=new Array(byteChars.length);for(let i=0;i<byteChars.length;i++)byteNumbers[i]=byteChars.charCodeAt(i);const byteArray=new Uint8Array(byteNumbers);const blobImg=new Blob([byteArray],{type:mime});const a2=document.createElement('a');a2.href=URL.createObjectURL(blobImg);a2.download=(note.title||'material').replace(/\s+/g,'_')+'.'+ext;a2.click();URL.revokeObjectURL(a2.href)}}}async function addNote(){if(!current){alert('Войдите');return}const t=el('title').value.trim(),d=el('desc').value.trim();const f=el('image').files[0];if(!t){alert('Введите название материала');return}let img='';if(f)img=await fileToDataURL(f);const noteData={title:t,desc:d,user:current,image:img,assignedTo:''};if(role==='admin'){pendingNoteData=noteData;openPreAssignModal()}else{try{await api('/notes',{method:'POST',body:JSON.stringify(noteData)});alert('✅ Материал успешно добавлен');el('title').value='';el('desc').value='';el('image').value='';loadNotes()}catch(e){console.error(e);alert('Ошибка при добавлении материала')}}}el('addNoteBtn').addEventListener('click',addNote);el('refreshBtn').addEventListener('click',loadNotes);async function loadNews(){try{const r=await api('/news');const arr=await r.json();const list=el('newsList');list.innerHTML='';arr.forEach((n,idx)=>{const card=document.createElement('div');card.className='note-card';card.innerHTML=`<h4>${escapeHtml(n.title)}</h4><p>${escapeHtml(n.desc)}</p>`;if(n.image){const img=document.createElement('img');img.src=n.image;img.style.maxWidth='100%';img.style.marginTop='8px';card.appendChild(img)}if(role==='admin'){const btnGroup=document.createElement('div');btnGroup.className='btn-group';const del=document.createElement('button');del.className='btn danger small';del.textContent='Удалить';del.onclick=async ()=>{if(!confirm('Удалить?'))return;await adminPost('/admin/news/delete',{index:idx});loadNews()};btnGroup.appendChild(del);card.appendChild(btnGroup)}list.appendChild(card)})}catch(e){console.error(e)}}async function addNews(){if(!current){alert('Войдите');return}const t=el('newsTitle').value.trim(),d=el('newsDesc').value.trim();const f=el('newsImage').files[0];let img='';if(f)img=await fileToDataURL(f);await api('/news',{method:'POST',body:JSON.stringify({title:t,desc:d,user:current,image:img})});el('newsTitle').value='';el('newsDesc').value='';el('newsImage').value='';el('newsForm').style.display='none';loadNews()}el('addNewsBtn')?.addEventListener('click',()=>el('newsForm').style.display='block');el('cancelNewsBtn')?.addEventListener('click',()=>el('newsForm').style.display='none');el('saveNewsBtn')?.addEventListener('click',addNews);async function loadGuides(){try{const r=await api('/guides');const arr=await r.json();const list=el('guidesList');list.innerHTML='';arr.forEach((g,idx)=>{const card=document.createElement('div');card.className='note-card';card.innerHTML=`<h4>${escapeHtml(g.title)}</h4><p>${escapeHtml(g.desc)}</p>`;if(g.image){const img=document.createElement('img');img.src=g.image;img.style.maxWidth='100%';img.style.marginTop='8px';card.appendChild(img)}const btnGroup=document.createElement('div');btnGroup.className='btn-group';const download=document.createElement('button');download.className='btn success small';download.textContent='📥 Скачать';download.onclick=()=>downloadGuideFiles(g);btnGroup.appendChild(download);if(role==='admin'){const del=document.createElement('button');del.className='btn danger small';del.textContent='Удалить';del.onclick=async ()=>{if(!confirm('Удалить?'))return;await adminPost('/admin/guides/delete',{index:idx});loadGuides()};btnGroup.appendChild(del)}card.appendChild(btnGroup);list.appendChild(card)})}catch(e){console.error(e)}}async function downloadGuideFiles(guide){const text=`Название: ${guide.title}\nАвтор: ${guide.user}\n\nОписание:\n${guide.desc}`;const blob=new Blob([text],{type:'text/plain'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=(guide.title||'guide').replace(/\s+/g,'_')+'.txt';a.click();URL.revokeObjectURL(a.href);if(guide.image){try{const response=await fetch(guide.image);const blob=await response.blob();const ext=response.headers.get('content-type').split('/')[1]||'png';const a2=document.createElement('a');a2.href=URL.createObjectURL(blob);a2.download=(guide.title||'guide').replace(/\s+/g,'_')+'.'+ext;a2.click();URL.revokeObjectURL(a2.href)}catch(e){const parts=guide.image.split(',');const meta=parts[0];const b64=parts[1]||'';const mime=(meta.match(/data:(.*);base64/)||[null,'image/png'])[1];const ext=mime.split('/')[1]||'png';const byteChars=atob(b64);const byteNumbers=new Array(byteChars.length);for(let i=0;i<byteChars.length;i++)byteNumbers[i]=byteChars.charCodeAt(i);const byteArray=new Uint8Array(byteNumbers);const blobImg=new Blob([byteArray],{type:mime});const a2=document.createElement('a');a2.href=URL.createObjectURL(blobImg);a2.download=(guide.title||'guide').replace(/\s+/g,'_')+'.'+ext;a2.click();URL.revokeObjectURL(a2.href)}}}async function addGuide(){if(!current){alert('Войдите');return}const t=el('guideTitle').value.trim(),d=el('guideDesc').value.trim();const f=el('guideImage').files[0];let img='';if(f)img=await fileToDataURL(f);await api('/guides',{method:'POST',body:JSON.stringify({title:t,desc:d,user:current,image:img})});el('guideTitle').value='';el('guideDesc').value='';el('guideImage').value='';el('guidesForm').style.display='none';loadGuides()}el('addGuideBtn')?.addEventListener('click',()=>el('guidesForm').style.display='block');el('cancelGuideBtn')?.addEventListener('click',()=>el('guidesForm').style.display='none');el('saveGuideBtn')?.addEventListener('click',addGuide);async function loadUsers(){try{const r=await adminPost('/admin/users/list',{});const u=await r.json();const div=el('usersList');div.innerHTML='';for(const k of Object.keys(u)){const item=document.createElement('div');item.style.padding='6px 0';item.style.borderBottom='1px solid var(--input-border)';item.textContent=escapeHtml(k)+' — '+escapeHtml(u[k].role);div.appendChild(item)}}catch(e){console.error(e)}}async function loadUsersList(){try{const r=await adminPost('/admin/users/list',{});const u=await r.json()}catch(e){console.error(e)}}async function saveUser(){const login=el('u_login').value.trim(),pass=el('u_pass').value,roleSel=el('u_role').value;if(!login){alert('Введите логин');return}const payload={login:login,role:roleSel};if(pass)payload.password=pass;try{const r=await adminPost('/admin/users/add_or_update',payload);const j=await r.json();if(!r.ok)alert(j.error||'Ошибка');else{loadUsers();loadAvailableUsers();el('u_login').value='';el('u_pass').value=''}}catch(e){console.error(e)}}async function delUser(){const login=el('del_login').value.trim();if(!login)return alert('Введите логин');try{const r=await adminPost('/admin/users/delete',{login});const j=await r.json();if(!r.ok)alert(j.error||'Ошибка');else{loadUsers();loadAvailableUsers();el('del_login').value=''}}catch(e){console.error(e)}}async function loadTheme(){try{const r=await api('/admin/settings/theme');const j=await r.json();el('themeSel').value=j.theme||'light';applyTheme(j.theme||'light')}catch(e){applyTheme('light')}}async function changeTheme(){const theme=el('themeSel').value;try{await adminPost('/admin/settings/theme',{theme});applyTheme(theme)}catch(e){console.error(e)}}function applyTheme(theme){if(theme==='dark'){document.documentElement.style.setProperty('--bg','var(--bg-dark)');document.documentElement.style.setProperty('--fg','var(--fg-dark)');document.documentElement.style.setProperty('--card','var(--card-dark)');document.documentElement.style.setProperty('--input-bg','var(--input-bg-dark)');document.documentElement.style.setProperty('--input-fg','var(--input-fg-dark)');document.documentElement.style.setProperty('--input-border','var(--input-border-dark)')}else{document.documentElement.style.setProperty('--bg','var(--bg-light)');document.documentElement.style.setProperty('--fg','var(--fg-light)');document.documentElement.style.setProperty('--card','var(--card-light)');document.documentElement.style.setProperty('--input-bg','var(--input-bg-light)');document.documentElement.style.setProperty('--input-fg','var(--input-fg-light)');document.documentElement.style.setProperty('--input-border','var(--input-border-light)')}}el('saveUserBtn').addEventListener('click',saveUser);el('delUserBtn').addEventListener('click',delUser);el('themeSel').addEventListener('change',changeTheme);el('loadResultsBtn').addEventListener('click',async ()=>{try{const r=await adminPost('/admin/results',{});const j=await r.json();const div=el('resultsList');div.innerHTML='';if(Array.isArray(j)){j.forEach(res=>{const item=document.createElement('div');item.style.padding='6px 0';item.style.borderBottom='1px solid var(--input-border)';item.textContent=escapeHtml(res.user)+' — тест #'+res.test_id+': '+res.score+'/'+res.total;div.appendChild(item)})}}catch(e){console.error(e)}});async function loadTests(){try{const r=await api('/tests');const arr=await r.json();const list=el('testsList');list.innerHTML='';arr.forEach((t)=>{const card=document.createElement('div');card.className='note-card';const desc=t.desc?`<p>${escapeHtml(t.desc)}</p>`:'';card.innerHTML=`<h4>${escapeHtml(t.title)}</h4>${desc}<p class="small">${t.questions.length} вопросов</p>`;const btn=document.createElement('button');btn.className='btn ghost';btn.textContent='Пройти тест';btn.style.width='100%';btn.style.marginTop='8px';btn.onclick=()=>startTestUI(t);card.appendChild(btn);if(role==='admin'){const delBtn=document.createElement('button');delBtn.className='btn danger';delBtn.textContent='Удалить';delBtn.style.width='100%';delBtn.style.marginTop='8px';delBtn.onclick=async ()=>{if(!confirm('Удалить тест?'))return;try{await adminPost('/admin/tests/delete',{id:t.id});loadTests()}catch(e){console.error(e)}};card.appendChild(delBtn)}list.appendChild(card)})}catch(e){console.error(e)}}function startTestUI(test){currentTestData=test;currentQuestionIndex=0;testAnswers=new Array(test.questions.length).fill(null);el('testModal').classList.add('active');el('testModalTitle').textContent=test.title;el('totalQuestions').textContent=test.questions.length;el('testResultContainer').innerHTML='';el('testResultContainer').style.display='none';el('testQuestionsContainer').style.display='block';renderTestQuestion()}function renderTestQuestion(){const questions=currentTestData.questions;const q=questions[currentQuestionIndex];const container=el('testQuestionsContainer');container.innerHTML='';let html=`<div class="question-box"><div class="question-number">Вопрос ${currentQuestionIndex+1} из ${questions.length}</div><div class="question-text">${escapeHtml(q.q)}</div>`;if(q.image){html+=`<img src="${q.image}" class="question-image" alt="Изображение вопроса">`}html+=`<div class="answer-options" id="answersContainer"></div></div>`;container.innerHTML=html;const answersContainer=el('answersContainer');q.choices.forEach((choice,idx)=>{const isSelected=testAnswers[currentQuestionIndex]===idx;const inputId=`ans_${idx}`;let optionHtml=`<label class="answer-option ${isSelected?'selected':''}"><input type="radio" id="${inputId}" name="answer" value="${idx}" ${isSelected?'checked':''}><div class="answer-text">${escapeHtml(choice)}</div></label>`;answersContainer.innerHTML+=optionHtml});document.querySelectorAll('input[name="answer"]').forEach(input=>{input.addEventListener('change',(e)=>{testAnswers[currentQuestionIndex]=parseInt(e.target.value);document.querySelectorAll('.answer-option').forEach(opt=>opt.classList.remove('selected'));e.target.closest('.answer-option').classList.add('selected')})});updateButtons();updateProgress()}function updateProgress(){const progress=((currentQuestionIndex+1)/currentTestData.questions.length)*100;el('progressFill').style.width=progress+'%';el('currentQuestion').textContent=currentQuestionIndex+1}function updateButtons(){el('prevBtn').disabled=currentQuestionIndex===0;el('nextBtn').style.display=currentQuestionIndex<currentTestData.questions.length-1?'block':'none';el('submitBtn').style.display=currentQuestionIndex===currentTestData.questions.length-1?'block':'none'}el('prevBtn').addEventListener('click',()=>{if(currentQuestionIndex>0){currentQuestionIndex--;renderTestQuestion()}});el('nextBtn').addEventListener('click',()=>{if(currentQuestionIndex<currentTestData.questions.length-1){currentQuestionIndex++;renderTestQuestion()}});el('submitBtn').addEventListener('click',async ()=>{try{const r=await api('/tests/submit',{method:'POST',body:JSON.stringify({test_id:currentTestData.id,answers:testAnswers,user:current})});const result=await r.json();showTestResult(result)}catch(e){console.error(e);alert('Ошибка отправки')}});function showTestResult(result){el('testQuestionsContainer').style.display='none';let percentage=result.percentage||0;let message='';if(percentage>=80)message='🎉 Отлично!';else if(percentage>=60)message='👍 Хорошо!';else if(percentage>=40)message='⚠️ Нужно повторить';else message='❌ Нужно больше практики';let html=`<div class="test-result"><h3>Тест завершён!</h3><div class="result-score">${result.score}/${result.total}</div><div style="font-size:18px;color:var(--muted);margin-bottom:16px">${percentage}%</div><div style="font-size:16px">${message}</div></div>`;el('testResultContainer').innerHTML=html;el('testResultContainer').style.display='block';el('prevBtn').style.display='none';el('nextBtn').style.display='none';el('submitBtn').style.display='none';el('closeTestBtn').style.display='block'}el('closeTestBtn').addEventListener('click',()=>{el('testModal').classList.remove('active');el('testResultContainer').style.display='none';el('testQuestionsContainer').style.display='block';el('testResultContainer').innerHTML='';el('prevBtn').style.display='block';el('closeTestBtn').style.display='none'});el('createTestBtn')?.addEventListener('click',()=>{wizardQuestions=[];el('wizTestTitle').value='';el('wizTestDesc').value='';showWizardStep(1);el('wizardModal').classList.add('active')});el('closeWizardBtn').addEventListener('click',()=>el('wizardModal').classList.remove('active'));function showWizardStep(step){document.querySelectorAll('.wizard-step').forEach(s=>s.classList.remove('active'));el('step'+step).classList.add('active')}function nextWizardStep(){const title=el('wizTestTitle').value.trim();if(!title){alert('Введите название теста');return}showWizardStep(2);renderQuestionsWiz()}function prevWizardStep(){showWizardStep(1)}function addQuestionToWiz(){const q=prompt('Текст вопроса:');if(!q)return;const c=prompt('Варианты ответов (через запятую):');if(!c)return;const a=prompt('Номер правильного ответа (1,2,3...):','1');if(!a)return;const idx=parseInt(a)-1;const choices=c.split(',').map(x=>x.trim());if(idx<0||idx>=choices.length){alert('Неверный номер ответа');return}wizardQuestions.push({q:q,choices:choices,type:'single',answers:[idx],image:''});renderQuestionsWiz()}function renderQuestionsWiz(){const div=el('questionsListWiz');div.innerHTML='';wizardQuestions.forEach((q,idx)=>{const item=document.createElement('div');item.style.padding='12px';item.style.background='rgba(11,94,168,0.05)';item.style.borderRadius='8px';item.style.marginBottom='8px';item.style.borderLeft='4px solid var(--primary)';const choices=q.choices.map((c,i)=>`${i+1}. ${escapeHtml(c)}${q.answers.includes(i)?' ✓':''}`).join('<br>');item.innerHTML=`<strong>Вопрос ${idx+1}:</strong> ${escapeHtml(q.q)}<br><div style="font-size:12px;margin-top:8px;color:var(--muted)">${choices}</div><button class="btn danger" style="width:100%;margin-top:8px;padding:6px" onclick="deleteQuestionWiz(${idx})">Удалить</button>`;div.appendChild(item)})}function deleteQuestionWiz(idx){wizardQuestions.splice(idx,1);renderQuestionsWiz()}async function finishWizard(){const title=el('wizTestTitle').value.trim();if(!title||wizardQuestions.length===0){alert('Заполните название и добавьте вопросы');return}const test={title:title,desc:el('wizTestDesc').value.trim(),questions:wizardQuestions};try{const r=await adminPost('/admin/tests/add_or_update',{test});const j=await r.json();if(!r.ok)alert(j.error||'Ошибка');else{alert('✅ Тест сохранен!');el('wizardModal').classList.remove('active');loadTests()}}catch(e){console.error(e);alert('Ошибка сохранения')}}applyTheme('light');
-</script>
+  <!-- МОДАЛИ -->
+  <div id="testModal" class="modal">
+    <div class="modal-content" style="max-width:700px">
+      <button class="modal-close" onclick="closeTestModal()">✕</button>
+      <h2 id="testModalTitle">Тест</h2>
+      <div id="testContent"></div>
+      <div class="btn-group">
+        <button id="prevBtn" class="btn ghost">← Назад</button>
+        <button id="nextBtn" class="btn">Далее →</button>
+        <button id="submitBtn" class="btn success" style="display:none">Отправить</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="testWizardModal" class="modal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeWizardModal()">✕</button>
+      <h2>Создание теста</h2>
+      <div id="wizardStep1" style="display:block">
+        <label>Название теста:</label>
+        <input id="wizTestTitle" placeholder="Введите название">
+        <label style="margin-top:12px">Описание:</label>
+        <textarea id="wizTestDesc" placeholder="Описание теста"></textarea>
+        <button id="nextWizStep1" class="btn block" style="margin-top:16px">Далее</button>
+      </div>
+      <div id="wizardStep2" style="display:none">
+        <label>Вопрос:</label>
+        <input id="wizQuestion" placeholder="Введите вопрос">
+        <label style="margin-top:12px">Тип:</label>
+        <select id="wizQType">
+          <option value="single">Один ответ</option>
+          <option value="multiple">Несколько ответов</option>
+        </select>
+        <label style="margin-top:12px">Варианты ответов (через запятую):</label>
+        <input id="wizChoices" placeholder="Ответ 1, Ответ 2, Ответ 3">
+        <label style="margin-top:12px">Правильные ответы (через запятую):</label>
+        <input id="wizAnswers" placeholder="Ответ 1">
+        <button id="addWizQuestion" class="btn">Добавить вопрос</button>
+        <div id="wizQuestionsPreview" style="margin-top:16px"></div>
+        <div class="btn-group" style="margin-top:16px">
+          <button id="backWizStep2" class="btn ghost">Назад</button>
+          <button id="finishWizTest" class="btn success">Создать тест</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="editModal" class="modal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeEditModal()">✕</button>
+      <h2>Редактирование материала</h2>
+      <input id="editTitle" placeholder="Название">
+      <textarea id="editDesc" placeholder="Описание"></textarea>
+      <input id="editImage" type="file" accept="image/*">
+      <label style="margin-top:12px;font-weight:600">Классы:</label>
+      <select id="editClasses" multiple style="min-height:80px;margin-top:8px">
+        <option value="">Всем</option>
+      </select>
+      <div class="btn-group" style="margin-top:16px">
+        <button class="btn ghost" onclick="closeEditModal()">Отменить</button>
+        <button class="btn success" id="saveEditBtn">Сохранить</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API = "";
+    let current = "", role = "", currentPass = "";
+    let currentTestData = null, currentQuestionIndex = 0, testAnswers = [];
+    let wizardQuestions = [];
+    let currentEditIndex = -1, currentEditType = "";
+    let classes_data = [];
+    let calendarEvents = [];
+
+    async function switchTab(tab) {
+      document.querySelectorAll(".tab-content").forEach(el => el.classList.remove("active"));
+      document.querySelectorAll(".tab-btn").forEach(el => el.classList.remove("active"));
+      document.getElementById(tab).classList.add("active");
+      event.target.classList.add("active");
+      
+      if (tab === "calendar") loadCalendar();
+      if (tab === "admin") loadClasses();
+    }
+
+    async function login() {
+      const login = document.getElementById("login").value;
+      const password = document.getElementById("password").value;
+      if (!login || !password) {
+        document.getElementById("loginError").textContent = "Логин и пароль обязательны";
+        return;
+      }
+      try {
+        const res = await fetch(API + "/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ login, password })
+        });
+        const data = await res.json();
+        if (data.ok) {
+          current = login;
+          currentPass = password;
+          role = data.role;
+          document.getElementById("loginBox").style.display = "none";
+          document.getElementById("mainBox").style.display = "block";
+          document.getElementById("userInfo").textContent = `👤 ${login} (${role === "admin" ? "Учитель" : "Ученик"})`;
+          document.getElementById("adminTabBtn").style.display = role === "admin" ? "block" : "none";
+          if (role === "admin") {
+            document.getElementById("newsAdminBtn").style.display = "block";
+            document.getElementById("guidesAdminBtn").style.display = "block";
+            document.getElementById("testsAdminBtn").style.display = "block";
+          }
+          loadClasses();
+          loadNotes();
+          loadNews();
+          loadGuides();
+          loadTests();
+        } else {
+          document.getElementById("loginError").textContent = data.error;
+        }
+      } catch (e) {
+        document.getElementById("loginError").textContent = "Ошибка подключения";
+      }
+    }
+
+    async function loadClasses() {
+      try {
+        const res = await fetch(API + "/classes");
+        classes_data = await res.json();
+        updateClassSelects();
+      } catch (e) {
+        console.error("Error loading classes:", e);
+      }
+    }
+
+    function updateClassSelects() {
+      const selects = ["classSelect", "newsClasses", "guideClasses", "editClasses"];
+      selects.forEach(id => {
+        const select = document.getElementById(id);
+        if (!select) return;
+        const current = select.value;
+        select.innerHTML = '<option value="">Всем</option>';
+        classes_data.forEach(cls => {
+          const opt = document.createElement("option");
+          opt.value = cls.id;
+          opt.textContent = cls.name;
+          select.appendChild(opt);
+        });
+        select.value = current;
+      });
+    }
+
+    async function loadCalendar() {
+      try {
+        const res = await fetch(API + "/calendar?user=" + current);
+        calendarEvents = await res.json();
+        displayCalendarEvents();
+      } catch (e) {
+        console.error("Error loading calendar:", e);
+      }
+    }
+
+    function displayCalendarEvents() {
+      const list = document.getElementById("calendarEventsList");
+      list.innerHTML = "";
+      calendarEvents.forEach((event, idx) => {
+        const div = document.createElement("div");
+        div.className = "calendar-event";
+        div.innerHTML = `
+          <strong>${event.title}</strong><br>
+          📅 ${event.date} ⏰ ${event.time}<br>
+          <small>${event.description}</small>
+          <div style="margin-top:8px;display:flex;gap:4px">
+            ${event.created_by === current || role === "admin" ? `
+              <button class="btn small" onclick="editCalendarEvent(${event.id})">✏️</button>
+              <button class="btn small danger" onclick="deleteCalendarEvent(${event.id})">🗑️</button>
+            ` : ""}
+          </div>
+        `;
+        list.appendChild(div);
+      });
+    }
+
+    async function addCalendarEvent() {
+      const title = document.getElementById("eventTitle").value;
+      const description = document.getElementById("eventDesc").value;
+      const date = document.getElementById("eventDate").value;
+      const time = document.getElementById("eventTime").value;
+      const visibility = document.getElementById("eventVisibility").value;
+
+      if (!title || !date || !time) {
+        alert("Заполните все поля");
+        return;
+      }
+
+      try {
+        await fetch(API + "/calendar/add", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ user: current, title, description, date, time, visibility, visible_to: [] })
+        });
+        document.getElementById("eventTitle").value = "";
+        document.getElementById("eventDesc").value = "";
+        document.getElementById("eventDate").value = "";
+        document.getElementById("eventTime").value = "";
+        loadCalendar();
+      } catch (e) {
+        console.error("Error adding event:", e);
+      }
+    }
+
+    async function deleteCalendarEvent(id) {
+      if (!confirm("Удалить событие?")) return;
+      try {
+        await fetch(API + "/calendar/delete", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id, user: current, payload: { admin_login: current, admin_password: currentPass } })
+        });
+        loadCalendar();
+      } catch (e) {
+        console.error("Error deleting event:", e);
+      }
+    }
+
+    async function addAdminClass() {
+      const name = document.getElementById("className").value;
+      if (!name) {
+        alert("Введите название класса");
+        return;
+      }
+      try {
+        await fetch(API + "/admin/classes/add", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, description: "", admin_login: current, admin_password: currentPass })
+        });
+        document.getElementById("className").value = "";
+        loadClasses();
+        displayAdminClasses();
+      } catch (e) {
+        console.error("Error adding class:", e);
+      }
+    }
+
+    async function displayAdminClasses() {
+      const list = document.getElementById("classesList");
+      list.innerHTML = "";
+      classes_data.forEach(cls => {
+        const div = document.createElement("div");
+        div.className = "class-item";
+        div.innerHTML = `
+          <h4>${cls.name}</h4>
+          <p>Учеников: ${cls.students ? cls.students.length : 0}</p>
+          <div style="margin-top:8px;display:flex;gap:6px">
+            <button class="btn small ghost" onclick="editClass(${cls.id})">✏️</button>
+            <button class="btn small danger" onclick="deleteClass(${cls.id})">🗑️</button>
+          </div>
+        `;
+        list.appendChild(div);
+      });
+    }
+
+    async function deleteClass(id) {
+      if (!confirm("Удалить класс?")) return;
+      try {
+        await fetch(API + "/admin/classes/delete", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id, admin_login: current, admin_password: currentPass })
+        });
+        loadClasses();
+        displayAdminClasses();
+      } catch (e) {
+        console.error("Error deleting class:", e);
+      }
+    }
+
+    async function loadNotes() {
+      try {
+        const res = await fetch(API + "/notes");
+        const notes = await res.json();
+        const list = document.getElementById("notesList");
+        list.innerHTML = "";
+        notes.forEach((note, idx) => {
+          const card = document.createElement("div");
+          card.className = "note-card";
+          const classInfo = note.classes && note.classes.length > 0 
+            ? classes_data.find(c => c.id == note.classes[0])
+            : null;
+          card.innerHTML = `
+            <h4>${note.title}</h4>
+            <p>${note.desc}</p>
+            ${note.classes && note.classes.length > 0 ? `<span class="badge badge-class">${classInfo ? classInfo.name : "Класс"}</span>` : ""}
+            <div style="margin-top:12px;display:flex;gap:6px;flex-wrap:wrap">
+              ${role === "admin" ? `
+                <button class="btn small ghost" onclick="editNote(${idx})">✏️</button>
+                <button class="btn small danger" onclick="deleteNote(${idx})">🗑️</button>
+              ` : note.user === current ? `
+                <button class="btn small ghost" onclick="editNote(${idx})">✏️</button>
+              ` : ""}
+            </div>
+          `;
+          list.appendChild(card);
+        });
+      } catch (e) {
+        console.error("Error loading notes:", e);
+      }
+    }
+
+    async function addNote() {
+      const title = document.getElementById("title").value;
+      const desc = document.getElementById("desc").value;
+      const classes = Array.from(document.getElementById("classSelect").selectedOptions).map(o => o.value);
+
+      if (!title) {
+        alert("Введите название");
+        return;
+      }
+
+      try {
+        await fetch(API + "/notes", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title, desc, user: current, image: "", assignedTo: "", classes })
+        });
+        document.getElementById("title").value = "";
+        document.getElementById("desc").value = "";
+        document.getElementById("image").value = "";
+        loadNotes();
+      } catch (e) {
+        console.error("Error adding note:", e);
+      }
+    }
+
+    async function deleteNote(idx) {
+      if (!confirm("Удалить?")) return;
+      try {
+        await fetch(API + "/admin/notes/delete", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ index: idx, admin_login: current, admin_password: currentPass })
+        });
+        loadNotes();
+      } catch (e) {
+        console.error("Error:", e);
+      }
+    }
+
+    function editNote(idx) {
+      currentEditIndex = idx;
+      currentEditType = "note";
+      document.getElementById("editModal").classList.add("active");
+    }
+
+    function closeEditModal() {
+      document.getElementById("editModal").classList.remove("active");
+    }
+
+    async function loadNews() {
+      try {
+        const res = await fetch(API + "/news");
+        const items = await res.json();
+        const list = document.getElementById("newsList");
+        list.innerHTML = "";
+        items.forEach((item, idx) => {
+          const card = document.createElement("div");
+          card.className = "note-card";
+          card.innerHTML = `
+            <h4>${item.title}</h4>
+            <p>${item.desc}</p>
+            ${role === "admin" ? `
+              <div style="margin-top:12px;display:flex;gap:6px">
+                <button class="btn small ghost" onclick="editNewsItem(${idx})">✏️</button>
+                <button class="btn small danger" onclick="deleteNewsItem(${idx})">🗑️</button>
+              </div>
+            ` : ""}
+          `;
+          list.appendChild(card);
+        });
+      } catch (e) {
+        console.error("Error:", e);
+      }
+    }
+
+    async function loadGuides() {
+      try {
+        const res = await fetch(API + "/guides");
+        const items = await res.json();
+        const list = document.getElementById("guidesList");
+        list.innerHTML = "";
+        items.forEach((item, idx) => {
+          const card = document.createElement("div");
+          card.className = "note-card";
+          card.innerHTML = `
+            <h4>${item.title}</h4>
+            <p>${item.desc}</p>
+            ${role === "admin" ? `
+              <div style="margin-top:12px;display:flex;gap:6px">
+                <button class="btn small ghost" onclick="editGuideItem(${idx})">✏️</button>
+                <button class="btn small danger" onclick="deleteGuideItem(${idx})">🗑️</button>
+              </div>
+            ` : ""}
+          `;
+          list.appendChild(card);
+        });
+      } catch (e) {
+        console.error("Error:", e);
+      }
+    }
+
+    async function loadTests() {
+      try {
+        const res = await fetch(API + "/tests");
+        const tests = await res.json();
+        const list = document.getElementById("testsList");
+        list.innerHTML = "";
+        tests.forEach((test, idx) => {
+          const card = document.createElement("div");
+          card.className = "note-card";
+          card.innerHTML = `
+            <h4>${test.title || "Тест"}</h4>
+            <p>Вопросов: ${test.questions ? test.questions.length : 0}</p>
+            <button class="btn small" onclick="startTest(${idx})" style="margin-top:12px">Пройти тест</button>
+          `;
+          list.appendChild(card);
+        });
+      } catch (e) {
+        console.error("Error:", e);
+      }
+    }
+
+    function startTest(idx) {
+      currentTestData = null;
+      fetch(API + "/tests").then(r => r.json()).then(tests => {
+        currentTestData = tests[idx];
+        currentQuestionIndex = 0;
+        testAnswers = [];
+        document.getElementById("testModal").classList.add("active");
+        displayTestQuestion();
+      });
+    }
+
+    function displayTestQuestion() {
+      if (!currentTestData) return;
+      const q = currentTestData.questions[currentQuestionIndex];
+      let html = `<div style="margin-bottom:20px">
+        <p style="font-size:12px;color:var(--muted)">Вопрос ${currentQuestionIndex + 1} из ${currentTestData.questions.length}</p>
+        <h4>${q.q}</h4>`;
+      
+      if (q.choices && q.choices.length > 0) {
+        if (q.type === "multiple") {
+          q.choices.forEach((choice, i) => {
+            html += `<label style="display:flex;gap:8px;margin-top:10px;cursor:pointer;padding:8px;border-radius:6px;background:var(--input-bg)">
+              <input type="checkbox" value="${choice}" onchange="updateAnswer(${i}, this.checked, true)">
+              ${choice}
+            </label>`;
+          });
+        } else {
+          q.choices.forEach((choice, i) => {
+            html += `<label style="display:flex;gap:8px;margin-top:10px;cursor:pointer;padding:8px;border-radius:6px;background:var(--input-bg)">
+              <input type="radio" name="answer" value="${choice}" onchange="updateAnswer(${i}, true, false)">
+              ${choice}
+            </label>`;
+          });
+        }
+      }
+      html += `</div>`;
+      document.getElementById("testContent").innerHTML = html;
+      
+      document.getElementById("prevBtn").style.display = currentQuestionIndex > 0 ? "inline-block" : "none";
+      if (currentQuestionIndex < currentTestData.questions.length - 1) {
+        document.getElementById("nextBtn").style.display = "inline-block";
+        document.getElementById("submitBtn").style.display = "none";
+      } else {
+        document.getElementById("nextBtn").style.display = "none";
+        document.getElementById("submitBtn").style.display = "inline-block";
+      }
+    }
+
+    function updateAnswer(idx, value, isMultiple) {
+      if (!testAnswers[currentQuestionIndex]) testAnswers[currentQuestionIndex] = isMultiple ? [] : null;
+      if (isMultiple) {
+        if (value) {
+          if (!testAnswers[currentQuestionIndex].includes(idx)) testAnswers[currentQuestionIndex].push(idx);
+        } else {
+          testAnswers[currentQuestionIndex] = testAnswers[currentQuestionIndex].filter(x => x !== idx);
+        }
+      } else {
+        testAnswers[currentQuestionIndex] = idx;
+      }
+    }
+
+    function nextQuestion() {
+      if (currentQuestionIndex < currentTestData.questions.length - 1) {
+        currentQuestionIndex++;
+        displayTestQuestion();
+      }
+    }
+
+    function prevQuestion() {
+      if (currentQuestionIndex > 0) {
+        currentQuestionIndex--;
+        displayTestQuestion();
+      }
+    }
+
+    async function submitTest() {
+      const answers = testAnswers.map((ans, i) => {
+        const q = currentTestData.questions[i];
+        if (Array.isArray(ans)) {
+          return ans.map(idx => q.choices[idx]);
+        } else if (ans !== null && ans !== undefined) {
+          return q.choices[ans];
+        }
+        return null;
+      });
+
+      try {
+        const res = await fetch(API + "/tests/submit", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ test_id: currentTestData.id, answers, user: current })
+        });
+        const result = await res.json();
+        document.getElementById("testContent").innerHTML = `
+          <div style="text-align:center;padding:40px">
+            <h3>Результат: ${result.score}/${result.total}</h3>
+            <h2 style="color:var(--primary)">${result.percentage}%</h2>
+          </div>
+        `;
+        document.getElementById("prevBtn").style.display = "none";
+        document.getElementById("nextBtn").style.display = "none";
+        document.getElementById("submitBtn").style.display = "none";
+      } catch (e) {
+        console.error("Error:", e);
+      }
+    }
+
+    function closeTestModal() {
+      document.getElementById("testModal").classList.remove("active");
+    }
+
+    function closeWizardModal() {
+      document.getElementById("testWizardModal").classList.remove("active");
+    }
+
+    function deleteNewsItem(idx) {
+      if (!confirm("Удалить?")) return;
+      fetch(API + "/admin/news/delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ index: idx, admin_login: current, admin_password: currentPass })
+      }).then(() => loadNews());
+    }
+
+    function deleteGuideItem(idx) {
+      if (!confirm("Удалить?")) return;
+      fetch(API + "/admin/guides/delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ index: idx, admin_login: current, admin_password: currentPass })
+      }).then(() => loadGuides());
+    }
+
+    // Event listeners
+    document.getElementById("loginBtn").onclick = login;
+    document.getElementById("logoutBtn").onclick = () => {
+      document.getElementById("loginBox").style.display = "block";
+      document.getElementById("mainBox").style.display = "none";
+      current = role = "";
+    };
+    document.getElementById("addNoteBtn").onclick = addNote;
+    document.getElementById("refreshBtn").onclick = loadNotes;
+    document.getElementById("addEventBtn").onclick = addCalendarEvent;
+    document.getElementById("addClassBtn").onclick = addAdminClass;
+    document.getElementById("addNewsBtn").onclick = () => {
+      document.getElementById("newsForm").style.display = 
+        document.getElementById("newsForm").style.display === "none" ? "block" : "none";
+    };
+    document.getElementById("addGuideBtn").onclick = () => {
+      document.getElementById("guidesForm").style.display = 
+        document.getElementById("guidesForm").style.display === "none" ? "block" : "none";
+    };
+    document.getElementById("createTestBtn").onclick = () => {
+      document.getElementById("testWizardModal").classList.add("active");
+    };
+    document.getElementById("saveUserBtn").onclick = async () => {
+      const login = document.getElementById("u_login").value;
+      const password = document.getElementById("u_pass").value;
+      const role_val = document.getElementById("u_role").value;
+      if (!login) { alert("Введите логин"); return; }
+      await fetch(API + "/admin/users/add_or_update", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ login, password, role: role_val, admin_login: current, admin_password: currentPass })
+      });
+      document.getElementById("u_login").value = "";
+      document.getElementById("u_pass").value = "";
+      loadUsersList();
+    };
+    document.getElementById("delUserBtn").onclick = async () => {
+      const login = document.getElementById("del_login").value;
+      if (!login) { alert("Введите логин"); return; }
+      await fetch(API + "/admin/users/delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ login, admin_login: current, admin_password: currentPass })
+      });
+      document.getElementById("del_login").value = "";
+      loadUsersList();
+    };
+    document.getElementById("themeBtn").onclick = async () => {
+      const theme = document.getElementById("themeSel").value;
+      await fetch(API + "/admin/settings/theme", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ theme, admin_login: current, admin_password: currentPass })
+      });
+      document.body.className = theme + "-theme";
+      localStorage.setItem("theme", theme);
+    };
+    document.getElementById("loadResultsBtn").onclick = async () => {
+      const res = await fetch(API + "/admin/results", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ admin_login: current, admin_password: currentPass })
+      });
+      const results = await res.json();
+      let html = "";
+      results.forEach(r => {
+        html += `<div style="padding:8px;border-bottom:1px solid var(--input-border);font-size:12px">
+          <strong>${r.user}</strong>: ${r.score}/${r.total} (${r.percentage}%)
+        </div>`;
+      });
+      document.getElementById("resultsList").innerHTML = html;
+    };
+
+    async function loadUsersList() {
+      const res = await fetch(API + "/admin/users/list", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ admin_login: current, admin_password: currentPass })
+      });
+      const users = await res.json();
+      let html = "";
+      Object.keys(users).forEach(login => {
+        html += `<div style="padding:6px;font-size:12px">${login} - ${users[login].role}</div>`;
+      });
+      document.getElementById("usersList").innerHTML = html;
+    }
+
+    document.getElementById("nextBtn").onclick = nextQuestion;
+    document.getElementById("prevBtn").onclick = prevQuestion;
+    document.getElementById("submitBtn").onclick = submitTest;
+
+    // Initialize
+    const theme = localStorage.getItem("theme") || "light";
+    document.body.className = theme + "-theme";
+    document.getElementById("themeSel").value = theme;
+  </script>
 </body>
 </html>
