@@ -1,7 +1,6 @@
 import os
 import json
 import bcrypt
-from datetime import datetime
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 
@@ -267,7 +266,7 @@ def delete_calendar_event():
     return jsonify({"error": "event not found"}), 404
 
 
-# ===== МАТЕРИАЛЫ =====
+# ===== NOTES (Materials) =====
 @app.get("/notes")
 def list_notes():
     return jsonify(notes)
@@ -307,6 +306,7 @@ def admin_delete_note():
 
 @app.post("/admin/materials/assign")
 def admin_assign_material():
+    """Переназначить материал пользователю (только админ)"""
     data = request.json or {}
     if not check_admin_payload(data):
         return jsonify({"error": "admin auth required"}), 403
@@ -329,6 +329,7 @@ def admin_assign_material():
 
 @app.post("/admin/materials/edit")
 def admin_edit_material():
+    """Отредактировать материал (только админ)"""
     data = request.json or {}
     if not check_admin_payload(data):
         return jsonify({"error": "admin auth required"}), 403
@@ -356,6 +357,7 @@ def admin_edit_material():
 
 @app.post("/materials/edit")
 def edit_own_material():
+    """Ученик редактирует только свой материал"""
     data = request.json or {}
 
     username = data.get("username")
@@ -370,6 +372,7 @@ def edit_own_material():
     if idx < 0 or idx >= len(notes):
         return jsonify({"error": "invalid index"}), 400
 
+    # Проверяем, что это материал пользователя
     if notes[idx].get("user") != username:
         return jsonify({"error": "can only edit your own materials"}), 403
 
@@ -384,7 +387,7 @@ def edit_own_material():
     return jsonify({"ok": True})
 
 
-# ===== НОВОСТИ =====
+# ===== NEWS =====
 @app.get("/news")
 def list_news():
     return jsonify(news)
@@ -444,7 +447,7 @@ def admin_update_news():
     return jsonify({"ok": True})
 
 
-# ===== ПОСОБИЯ =====
+# ===== GUIDES =====
 @app.get("/guides")
 def list_guides():
     return jsonify(guides)
@@ -504,7 +507,7 @@ def admin_update_guide():
     return jsonify({"ok": True})
 
 
-# ===== ПОЛЬЗОВАТЕЛИ =====
+# ===== USERS =====
 @app.post("/admin/users/list")
 def admin_users_list():
     payload = request.json or {}
@@ -551,7 +554,7 @@ def admin_users_delete():
     return jsonify({"ok": True})
 
 
-# ===== НАСТРОЙКИ =====
+# ===== SETTINGS =====
 @app.get("/admin/settings/theme")
 def get_theme():
     return jsonify(settings)
@@ -570,7 +573,7 @@ def set_theme():
     return jsonify({"ok": True})
 
 
-# ===== ТЕСТЫ =====
+# ===== TESTS =====
 @app.get("/tests")
 def get_tests_public():
     safe = []
@@ -595,13 +598,15 @@ def get_tests_public():
                         if c is None:
                             continue
                         if isinstance(c, dict):
-                            normalized.append(str(c.get('text') or c.get('label') or c.get('choice') or json.dumps(c, ensure_ascii=False)))
+                            normalized.append(str(c.get('text') or c.get('label') or c.get('choice') or json.dumps(c,
+                                                                                                                   ensure_ascii=False)))
                         else:
                             normalized.append(str(c))
                     choices = normalized
                 else:
                     if isinstance(choices_raw, dict):
-                        choices = [str(choices_raw.get('text') or choices_raw.get('label') or json.dumps(choices_raw, ensure_ascii=False))]
+                        choices = [str(choices_raw.get('text') or choices_raw.get('label') or json.dumps(choices_raw,
+                                                                                                         ensure_ascii=False))]
                     else:
                         choices = [str(choices_raw)]
 
