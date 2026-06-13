@@ -1,6 +1,7 @@
 import os
 import json
 import bcrypt
+from datetime import datetime
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 
@@ -14,6 +15,8 @@ GUIDES_FILE = "guides.json"
 SETTINGS_FILE = "settings.json"
 RESULTS_FILE = "results.json"
 TESTS_FILE = "tests.json"
+CLASSES_FILE = "classes.json"
+CALENDAR_FILE = "calendar.json"
 
 
 def load_json(path, default):
@@ -77,6 +80,8 @@ guides = load_json(GUIDES_FILE, [])
 settings = load_json(SETTINGS_FILE, {"theme": "light"})
 tests = load_json(TESTS_FILE, [])
 results = load_json(RESULTS_FILE, [])
+classes_data = load_json(CLASSES_FILE, [])
+calendar_events = load_json(CALENDAR_FILE, [])
 
 
 def check_admin_payload(payload):
@@ -111,7 +116,158 @@ def login():
     return jsonify({"ok": True, "role": u.get("role", "student")})
 
 
-# ===== NOTES (Materials) =====
+# ===== КЛАССЫ =====
+@app.get("/classes")
+def list_classes():
+    return jsonify(classes_data)
+
+
+@app.post("/admin/classes/add")
+def admin_add_class():
+    data = request.json or {}
+    if not check_admin_payload(data):
+        return jsonify({"error": "admin auth required"}), 403
+    class_item = {
+        "id": (max([c.get("id", 0) for c in classes_data]) + 1) if classes_data else 1,
+        "name": data.get("name", ""),
+        "description": data.get("description", ""),
+        "students": data.get("students", [])
+    }
+    classes_data.append(class_item)
+    save_json(CLASSES_FILE, classes_data)
+    return jsonify({"ok": True, "id": class_item["id"]})
+
+
+@app.post("/admin/classes/update")
+def admin_update_class():
+    data = request.json or {}
+    if not check_admin_payload(data):
+        return jsonify({"error": "admin auth required"}), 403
+    class_id = data.get("id")
+    for cls in classes_data:
+        if cls.get("id") == class_id:
+            if "name" in data:
+                cls["name"] = data.get("name")
+            if "description" in data:
+                cls["description"] = data.get("description")
+            if "students" in data:
+                cls["students"] = data.get("students")
+            save_json(CLASSES_FILE, classes_data)
+            return jsonify({"ok": True})
+    return jsonify({"error": "class not found"}), 404
+
+
+@app.post("/admin/classes/delete")
+def admin_delete_class():
+    data = request.json or {}
+    if not check_admin_payload(data):
+        return jsonify({"error": "admin auth required"}), 403
+    class_id = data.get("id")
+    for i, cls in enumerate(classes_data):
+        if cls.get("id") == class_id:
+            classes_data.pop(i)
+            save_json(CLASSES_FILE, classes_data)
+            return jsonify({"ok": True})
+    return jsonify({"error": "class not found"}), 404
+
+
+# ===== КАЛЕНДАРЬ =====
+@app.get("/calendar")
+def list_calendar():
+    username = request.args.get("user", "")
+    user_events = []
+    for event in calendar_events:
+        if event.get("created_by") == "admin":
+            user_events.append(event)
+        elif event.get("created_by") == username and event.get("visibility") == "private":
+            user_events.append(event)
+        elif event.get("visibility") == "public":
+            user_events.append(event)
+        elif username in event.get("visible_to", []):
+            user_events.append(event)
+    return jsonify(user_events)
+
+
+@app.post("/calendar/add")
+def add_calendar_event():
+    data = request.json or {}
+    username = data.get("user", "")
+    if not username:
+        return jsonify({"error": "user required"}), 400
+    
+    event = {
+        "id": (max([e.get("id", 0) for e in calendar_events]) + 1) if calendar_events else 1,
+        "title": data.get("title", ""),
+        "description": data.get("description", ""),
+        "date": data.get("date", ""),
+        "time": data.get("time", ""),
+        "created_by": username,
+        "visibility": data.get("visibility", "private"),
+        "visible_to": data.get("visible_to", [])
+    }
+    calendar_events.append(event)
+    save_json(CALENDAR_FILE, calendar_events)
+    return jsonify({"ok": True, "id": event["id"]})
+
+
+@app.post("/calendar/edit")
+def edit_calendar_event():
+    data = request.json or {}
+    event_id = data.get("id")
+    username = data.get("user", "")
+    payload = data.get("payload", {})
+    
+    if not check_admin_payload(payload):
+        is_admin = False
+    else:
+        is_admin = True
+    
+    for event in calendar_events:
+        if event.get("id") == event_id:
+            if is_admin or event.get("created_by") == username:
+                if "title" in data:
+                    event["title"] = data.get("title")
+                if "description" in data:
+                    event["description"] = data.get("description")
+                if "date" in data:
+                    event["date"] = data.get("date")
+                if "time" in data:
+                    event["time"] = data.get("time")
+                if "visibility" in data and is_admin:
+                    event["visibility"] = data.get("visibility")
+                if "visible_to" in data and is_admin:
+                    event["visible_to"] = data.get("visible_to")
+                save_json(CALENDAR_FILE, calendar_events)
+                return jsonify({"ok": True})
+            else:
+                return jsonify({"error": "cannot edit this event"}), 403
+    return jsonify({"error": "event not found"}), 404
+
+
+@app.post("/calendar/delete")
+def delete_calendar_event():
+    data = request.json or {}
+    event_id = data.get("id")
+    username = data.get("user", "")
+    payload = data.get("payload", {})
+    
+    if not check_admin_payload(payload):
+        is_admin = False
+    else:
+        is_admin = True
+    
+    for i, event in enumerate(calendar_events):
+        if event.get("id") == event_id:
+            if is_admin or event.get("created_by") == username:
+                calendar_events.pop(i)
+                save_json(CALENDAR_FILE, calendar_events)
+                return jsonify({"ok": True})
+            else:
+                return jsonify({"error": "cannot delete this event"}), 403
+    return jsonify({"error": "event not found"}), 404
+
+
+# ===== МАТЕРИАЛЫ =====
 @app.get("/notes")
 def list_notes():
     return jsonify(notes)
@@ -125,7 +281,8 @@ def add_note():
         "desc": data.get("desc", ""),
         "user": data.get("user", ""),
         "image": data.get("image", ""),
-        "assignedTo": data.get("assignedTo", "")
+        "assignedTo": data.get("assignedTo", ""),
+        "classes": data.get("classes", [])
     }
     notes.append(note)
     save_json(NOTES_FILE, notes)
@@ -150,7 +307,6 @@ def admin_delete_note():
 
 @app.post("/admin/materials/assign")
 def admin_assign_material():
-    """Переназначить материал пользователю (только админ)"""
     data = request.json or {}
     if not check_admin_payload(data):
         return jsonify({"error": "admin auth required"}), 403
@@ -164,14 +320,15 @@ def admin_assign_material():
         return jsonify({"error": "invalid index"}), 400
 
     assigned_to = data.get("assigned_to", "")
+    classes = data.get("classes", [])
     notes[idx]["assignedTo"] = assigned_to
+    notes[idx]["classes"] = classes
     save_json(NOTES_FILE, notes)
     return jsonify({"ok": True})
 
 
 @app.post("/admin/materials/edit")
 def admin_edit_material():
-    """Отредактировать материал (только админ)"""
     data = request.json or {}
     if not check_admin_payload(data):
         return jsonify({"error": "admin auth required"}), 403
@@ -190,6 +347,8 @@ def admin_edit_material():
         notes[idx]["desc"] = data.get("desc", "")
     if "image" in data:
         notes[idx]["image"] = data.get("image", "")
+    if "classes" in data:
+        notes[idx]["classes"] = data.get("classes", [])
 
     save_json(NOTES_FILE, notes)
     return jsonify({"ok": True})
@@ -197,7 +356,6 @@ def admin_edit_material():
 
 @app.post("/materials/edit")
 def edit_own_material():
-    """Ученик редактирует только свой материал"""
     data = request.json or {}
 
     username = data.get("username")
@@ -212,7 +370,6 @@ def edit_own_material():
     if idx < 0 or idx >= len(notes):
         return jsonify({"error": "invalid index"}), 400
 
-    # Проверяем, что это материал пользователя
     if notes[idx].get("user") != username:
         return jsonify({"error": "can only edit your own materials"}), 403
 
@@ -227,7 +384,7 @@ def edit_own_material():
     return jsonify({"ok": True})
 
 
-# ===== NEWS =====
+# ===== НОВОСТИ =====
 @app.get("/news")
 def list_news():
     return jsonify(news)
@@ -240,7 +397,8 @@ def add_news():
         "title": data.get("title", ""),
         "desc": data.get("desc", ""),
         "user": data.get("user", ""),
-        "image": data.get("image", "")
+        "image": data.get("image", ""),
+        "classes": data.get("classes", [])
     }
     news.append(news_item)
     save_json(NEWS_FILE, news)
@@ -280,11 +438,13 @@ def admin_update_news():
         news[idx]["desc"] = data.get("desc", news[idx].get("desc", ""))
     if "image" in data:
         news[idx]["image"] = data.get("image", news[idx].get("image", ""))
+    if "classes" in data:
+        news[idx]["classes"] = data.get("classes", [])
     save_json(NEWS_FILE, news)
     return jsonify({"ok": True})
 
 
-# ===== GUIDES =====
+# ===== ПОСОБИЯ =====
 @app.get("/guides")
 def list_guides():
     return jsonify(guides)
@@ -297,7 +457,8 @@ def add_guide():
         "title": data.get("title", ""),
         "desc": data.get("desc", ""),
         "user": data.get("user", ""),
-        "image": data.get("image", "")
+        "image": data.get("image", ""),
+        "classes": data.get("classes", [])
     }
     guides.append(guide)
     save_json(GUIDES_FILE, guides)
@@ -337,11 +498,13 @@ def admin_update_guide():
         guides[idx]["desc"] = data.get("desc", guides[idx].get("desc", ""))
     if "image" in data:
         guides[idx]["image"] = data.get("image", guides[idx].get("image", ""))
+    if "classes" in data:
+        guides[idx]["classes"] = data.get("classes", [])
     save_json(GUIDES_FILE, guides)
     return jsonify({"ok": True})
 
 
-# ===== USERS =====
+# ===== ПОЛЬЗОВАТЕЛИ =====
 @app.post("/admin/users/list")
 def admin_users_list():
     payload = request.json or {}
@@ -388,7 +551,7 @@ def admin_users_delete():
     return jsonify({"ok": True})
 
 
-# ===== SETTINGS =====
+# ===== НАСТРОЙКИ =====
 @app.get("/admin/settings/theme")
 def get_theme():
     return jsonify(settings)
@@ -407,7 +570,7 @@ def set_theme():
     return jsonify({"ok": True})
 
 
-# ===== TESTS =====
+# ===== ТЕСТЫ =====
 @app.get("/tests")
 def get_tests_public():
     safe = []
@@ -432,15 +595,13 @@ def get_tests_public():
                         if c is None:
                             continue
                         if isinstance(c, dict):
-                            normalized.append(str(c.get('text') or c.get('label') or c.get('choice') or json.dumps(c,
-                                                                                                                   ensure_ascii=False)))
+                            normalized.append(str(c.get('text') or c.get('label') or c.get('choice') or json.dumps(c, ensure_ascii=False)))
                         else:
                             normalized.append(str(c))
                     choices = normalized
                 else:
                     if isinstance(choices_raw, dict):
-                        choices = [str(choices_raw.get('text') or choices_raw.get('label') or json.dumps(choices_raw,
-                                                                                                         ensure_ascii=False))]
+                        choices = [str(choices_raw.get('text') or choices_raw.get('label') or json.dumps(choices_raw, ensure_ascii=False))]
                     else:
                         choices = [str(choices_raw)]
 
